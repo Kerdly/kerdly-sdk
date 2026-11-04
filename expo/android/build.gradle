@@ -1,0 +1,61 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+def packageJson = new groovy.json.JsonSlurper().parse(file('../package.json'))
+
+group = 'com.kerdly.expo'
+version = packageJson.version
+
+// The native Android SDK (package com.kerdly.sdk) is vendored into vendor/kerdly-sdk by
+// scripts/sync-native.mjs (npm `prepare`/`prepack`) and compiled into this module with the bridge.
+def vendoredSdk = file('vendor/kerdly-sdk')
+def sdkPropertiesFile = new File(vendoredSdk, 'kerdly-sdk.properties')
+if (!sdkPropertiesFile.exists()) {
+  throw new GradleException(
+    "[@kerdly/expo] ${vendoredSdk} is missing. Run `npm run sync-native` in the @kerdly/expo " +
+    "package (it copies ../android/kerdly-sdk), or install a packed/published build of the package."
+  )
+}
+def sdkProperties = new Properties()
+sdkPropertiesFile.withInputStream { sdkProperties.load(it) }
+
+android {
+  // The SDK's own namespace, so the vendored sources find com.kerdly.sdk.BuildConfig (and R) exactly as
+  // in the standalone library. The bridge classes live in package com.kerdly.expo.
+  namespace 'com.kerdly.sdk'
+
+  buildFeatures {
+    buildConfig true
+  }
+
+  defaultConfig {
+    versionCode 1
+    versionName packageJson.version
+    // As in kerdly-sdk/build.gradle.kts: the native SDK version, sent in `sdk.version` and `X-Afr-Sdk`.
+    buildConfigField 'String', 'KERDLY_VERSION', "\"${sdkProperties.getProperty('KERDLY_VERSION')}\""
+    // The SDK's consumer R8 rules, when it ships any.
+    def sdkRules = new File(vendoredSdk, 'consumer-rules.pro')
+    if (sdkRules.exists()) {
+      consumerProguardFiles sdkRules
+    }
+  }
+
+  sourceSets {
+    main {
+      java.srcDirs += ['vendor/kerdly-sdk/java', 'vendor/kerdly-sdk/kotlin']
+      res.srcDirs += ['vendor/kerdly-sdk/res']
+      assets.srcDirs += ['vendor/kerdly-sdk/assets']
+      resources.srcDirs += ['vendor/kerdly-sdk/resources']
+      // The SDK's manifest entries are declared in src/main/AndroidManifest.xml (the sync script
+      // fails when they drift apart).
+    }
+  }
+}
+
+dependencies {
+  // The vendored SDK's dependencies (kerdly-sdk/build.gradle.kts; the sync script checks they match).
+  implementation 'com.android.installreferrer:installreferrer:2.2'
+  implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
+}

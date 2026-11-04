@@ -1,0 +1,26 @@
+{
+  "touchpoints": [
+    {
+      "event_id": "fwd_9f8e7d6c5b4a",
+      "kind": "click",
+      "visit_id": "abcd1234efgh5678",
+      "chain_from": null,
+      "occurred_at": 1760399889000,
+      "request": {
+        "ip": "203.0.113.42", "ip_source": "trusted_client_ip",
+        "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/22G86 [FBAN/FBIOS;FBAV/530.0.0.43.109;FBBV/812345678;FBDV/iPhone17,1;FBMD/iPhone;FBSN/iOS;FBSV/26.0.1;FBSS/3;FBCR/;FBID/phone;FBLC/en_US;FBOP/80]",
+        "url": "https://acme-app.com/app-start?fbclid=IwAR0abc&campaign_id=120211&adset_id=120212&ad_id=120213&utm_source=meta",
+        "referer": "https://l.facebook.com/", "accept_language": null, "country": "US"
+      },
+      "cookies": {"_fbc": "fb.1.1760399889000.IwAR0abc", "_fbp": "fb.1.1760399000000.123456789", "_ttp": null,
+                  "visitor": "abcd1234efgh5678", "__w2a_attr": null},
+      "classification": {"kind": "human", "reason": null, "by": "acme-app.com"},
+      "destination": {"target": "app_store_cpp",
+                      "url": "https://apps.apple.com/app/id6449081453?ppid=ce3a1b2c-0000-4000-8000-000000000001&ct=w2a_meta_appstart&mt=8",
+                      "ppid": "ce3a1b2c-0000-4000-8000-000000000001", "ct": "w2a_meta_appstart"},
+      "placement": {"source": "ads", "landing_variant": null, "page_path": "/app-start"},
+      "attribution": {"network": "meta", "paid": true, "click_id_key": "fbclid", "click_id": "IwAR0abc",
+                      "campaign_id": "120211", "adset_id": "120212", "ad_id": "120213"}
+    }
+  ]
+}

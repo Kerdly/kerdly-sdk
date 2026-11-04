@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "enabled": true,
+  "off": false,
+  "flush": {"max_batch": 50, "queue_flush_at": 20, "interval_s": 15},
+  "events": {"block": []},
+  "collect": {"advertising_id": true, "app_transaction": true, "asa_token": true,
+              "install_referrer": true, "meta_install_referrer": true, "purchases": true,
+              "public_ip": true},
+  "ipv6_echo_url": "https://api6.ipify.org?format=json",
+  "skan": {
+    "version": 1, "enabled": false,
+    "rungs": [
+      {"event": "$install", "fine": 0, "coarse": "low", "on": ["launch"]},
+      {"event": "registration", "fine": 8, "coarse": "low", "on": ["event"]},
+      {"event": "trial_start", "fine": 32, "coarse": "medium", "on": ["purchase"]},
+      {"event": "subscribe", "fine": 63, "coarse": "high", "on": ["purchase", "sweep"]}
+    ],
+    "lock_window": false, "aak_mirror": true
+  },
+  "ddl": {"enabled": false, "max_age_h": 47, "require_att": true, "meta": {"app_id": null, "client_token": null}, "tiktok": null},
+  "min_supported_sdk": "0.1.0",
+  "debug_devices": []
+}

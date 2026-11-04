@@ -1,0 +1,58 @@
+{
+  "name": "@kerdly/web",
+  "version": "0.1.0",
+  "description": "Kerdly web SDK: first-party visitor id, visit and click touches (POST /v1/web/touch), identify (POST /v1/web/identify), link decoration and pixel event ids. Ships the kerdly.js snippet.",
+  "license": "MIT",
+  "author": "Kerdly",
+  "homepage": "https://github.com/Kerdly/kerdly-sdk/tree/main/web#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kerdly/kerdly-sdk.git",
+    "directory": "web"
+  },
+  "keywords": [
+    "attribution",
+    "analytics",
+    "kerdly",
+    "web"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "./dist/kerdly.js"
+  ],
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.mjs"
+    },
+    "./kerdly.js": "./dist/kerdly.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node build.mjs && tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "tsc -p tsconfig.json && vitest run",
+    "prepack": "npm run build"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^30.0.0",
+    "@types/node": "^22.20.5",
+    "esbuild": "^0.28.2",
+    "jsdom": "^30.1.2",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.4"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

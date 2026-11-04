@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "node16",
+    "moduleResolution": "node16",
+    "isolatedModules": true,
+    "rootDir": ".",
+    "allowJs": false,
+    "checkJs": false
+  }
+}

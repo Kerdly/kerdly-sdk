@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Merged into the host app's manifest. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Google advertising id (GAID) on Android 13+. Kids / Families apps remove it with
+         <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove" />
+         and pass collectAdvertisingId = false. -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+
+    <!-- Package visibility (Android 11+) for the Meta Install Referrer content providers. -->
+    <queries>
+        <package android:name="com.facebook.katana" />
+        <package android:name="com.instagram.android" />
+        <package android:name="com.facebook.lite" />
+    </queries>
+
+</manifest>

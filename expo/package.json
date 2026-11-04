@@ -1,0 +1,75 @@
+{
+  "name": "@kerdly/expo",
+  "version": "0.1.0",
+  "description": "Kerdly attribution SDK for Expo and React Native: a thin bridge over the native KerdlySDK (iOS) and com.kerdly.sdk (Android) SDKs, plus a config plugin.",
+  "license": "MIT",
+  "author": "Kerdly",
+  "homepage": "https://github.com/Kerdly/kerdly-sdk/tree/main/expo#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kerdly/kerdly-sdk.git",
+    "directory": "expo"
+  },
+  "keywords": [
+    "react-native",
+    "expo",
+    "attribution",
+    "kerdly"
+  ],
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "files": [
+    "build",
+    "src",
+    "plugin",
+    "app.plugin.js",
+    "expo-module.config.json",
+    "ios/KerdlySdk.podspec",
+    "ios/*.swift",
+    "ios/KerdlySDK",
+    "android/build.gradle",
+    "android/src/main",
+    "android/vendor",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "node -e \"require('fs').rmSync('build',{recursive:true,force:true})\"",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "sync-native": "node scripts/sync-native.mjs",
+    "sync-native:check": "node scripts/sync-native.mjs --check",
+    "prepare": "node scripts/sync-native.mjs && npm run build",
+    "prepack": "node scripts/sync-native.mjs --strict && npm run build"
+  },
+  "peerDependencies": {
+    "expo": "*",
+    "expo-modules-core": "*",
+    "react-native": "*"
+  },
+  "peerDependenciesMeta": {
+    "expo": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@expo/config-plugins": "^57.0.10",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.1.1",
+    "expo-modules-core": "~57.0.22",
+    "jest": "^30.5.2",
+    "react": "^19.2.3",
+    "react-native": "0.87.1",
+    "ts-jest": "^29.4.14",
+    "typescript": "~6.0.3"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

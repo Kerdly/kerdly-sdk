@@ -1,0 +1,23 @@
+# Dependencies and build output
+node_modules/
+build/
+coverage/
+*.tgz
+
+# Native SDK sources vendored by scripts/sync-native.mjs (from ../ios and ../android).
+# They are copied at `prepare`/`prepack` time and shipped in the npm tarball, never committed.
+/ios/KerdlySDK/
+/android/vendor/
+
+# Native build output when the module is opened on its own
+/android/build/
+/android/.gradle/
+/android/.cxx/
+/ios/Pods/
+xcuserdata/
+DerivedData/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/

@@ -1,0 +1,17 @@
+{
+  "key": "wk_live_example",
+  "event_id": "b7c8d9e0-f1a2-4b3c-8d4e-5f6a7b8c9d0e",
+  "kind": "visit",
+  "visitor_id": "q3k9m2x7a8b4c5d6e7f8g9",
+  "url": "https://acme-app.com/lp/failing-exam?fbclid=IwAR0abc&utm_source=meta&campaign_id=120211&adset_id=120212&ad_id=120213",
+  "referrer": "https://l.facebook.com/",
+  "title": "Failed the DMV test?",
+  "chain_from": null,
+  "link": null,
+  "cookies": {
+    "fbp": "fb.1.1760399000000.123456789",
+    "fbc": "fb.1.1760399880000.IwAR0abc",
+    "ttp": null
+  },
+  "ts": 1760399880000
+}

@@ -1,0 +1,104 @@
+name: Release
+
+# Push a version tag (e.g. `0.2.0`, no `v`) after `node scripts/version.mjs --set 0.2.0` is merged.
+# SwiftPM resolves the tag itself; this workflow publishes the other registries.
+#
+# Credentials: every publishing job runs in the `release` environment (Settings → Environments).
+# Its secrets are readable only by jobs that name it, and its protection rules (required reviewer,
+# deployment tags `[0-9]*`) make each release wait for a maintainer's approval. npm uses trusted
+# publishing (OIDC): no npm token is stored once the packages exist and the trusted publisher is set.
+on:
+  push:
+    tags: ['[0-9]+.[0-9]+.[0-9]+*']
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Every package says ${{ github.ref_name }}
+        run: node scripts/version.mjs --check "${{ github.ref_name }}"
+
+  npm:
+    needs: check
+    environment: release
+    permissions:
+      contents: read
+      id-token: write   # trusted publishing and provenance
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: [web, expo]
+    defaults:
+      run:
+        working-directory: ${{ matrix.package }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - run: npm install -g npm@11   # trusted publishing needs npm 11.5+
+      - run: npm ci
+      - run: npm test
+      - name: Publish (pre-releases go to the `next` tag)
+        run: |
+          if [[ "${{ github.ref_name }}" == *-* ]]; then TAG=next; else TAG=latest; fi
+          npm publish --provenance --access public --tag "$TAG"
+        env:
+          # Only for the very first publish, before a trusted publisher can be configured on
+          # npmjs.com. Delete the secret afterwards; OIDC then needs no token.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  maven-central:
+    needs: check
+    environment: release
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - run: ./gradlew :kerdly-sdk:testDebugUnitTest :kerdly-sdk:publishToMavenCentral --no-configuration-cache
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+
+  cocoapods:
+    needs: check
+    environment: release
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: pod trunk push KerdlySDK.podspec --allow-warnings
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+
+  github-release:
+    needs: [npm, maven-central, cocoapods]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Release with the CHANGELOG section and the kerdly.js snippet
+        run: |
+          cd web && npm ci && npm run build && cd ..
+          awk -v v="${{ github.ref_name }}" '$0 ~ "^## " {p = ($2 == v)} p' CHANGELOG.md | tail -n +2 > notes.md
+          gh release create "${{ github.ref_name }}" web/dist/kerdly.js --title "${{ github.ref_name }}" --notes-file notes.md \
+            $([[ "${{ github.ref_name }}" == *-* ]] && echo --prerelease)
+        env:
+          GH_TOKEN: ${{ github.token }}

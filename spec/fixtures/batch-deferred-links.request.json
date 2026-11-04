@@ -1,0 +1,85 @@
+{
+  "sdk": {
+    "name": "afr-ios",
+    "version": "0.1.0",
+    "wrapper": "expo/0.1.0"
+  },
+  "app": {
+    "bundle": "com.acme.other",
+    "version": "5.12",
+    "build": "131",
+    "environment": "production"
+  },
+  "install_id": "8c1f5d0e-2f3a-4c55-9d7e-1b2c3d4e5f60",
+  "sent_at": 1760400065000,
+  "context": {
+    "platform": "ios",
+    "os": "26.0.1",
+    "model": "iPhone17,1",
+    "manufacturer": "Apple",
+    "locale": "en_US",
+    "languages": [
+      "en-US"
+    ],
+    "tz": "America/Chicago",
+    "screen": {
+      "w": 1206,
+      "h": 2622,
+      "scale": 3
+    },
+    "idfv": "5B0E7C1D-4D2B-4E0C-9F1A-2B3C4D5E6F70",
+    "att": "authorized",
+    "consent": {
+      "analytics": true,
+      "ads": true
+    },
+    "app_version": "5.12",
+    "app_build": "131"
+  },
+  "events": [
+    {
+      "id": "3b9e2a71-5c4d-4e8f-9a0b-1c2d3e4f5a61",
+      "name": "$signal",
+      "ts": 1760400060000,
+      "seq": 5,
+      "props": {
+        "kind": "deferred_link",
+        "network": "meta",
+        "status": "link",
+        "url": "com.acme.app://onboarding?utm_source=meta&campaign_id=120211111111110&adset_id=120222222222220&ad_id=120233333333330&fb_click_time_utc=1760396400",
+        "click_ts": 1760396400000,
+        "cpp": null,
+        "ppid": null,
+        "afr_c": null,
+        "afr_v": null,
+        "campaign_ids": null,
+        "http_status": 200,
+        "detail": null,
+        "attempt": 1,
+        "att": "authorized"
+      }
+    },
+    {
+      "id": "3b9e2a71-5c4d-4e8f-9a0b-1c2d3e4f5a62",
+      "name": "$signal",
+      "ts": 1760400060500,
+      "seq": 6,
+      "props": {
+        "kind": "deferred_link",
+        "network": "tiktok",
+        "status": "none",
+        "url": null,
+        "click_ts": null,
+        "cpp": null,
+        "ppid": null,
+        "afr_c": null,
+        "afr_v": null,
+        "campaign_ids": null,
+        "http_status": 200,
+        "detail": null,
+        "attempt": 1,
+        "att": "authorized"
+      }
+    }
+  ]
+}

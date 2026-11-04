@@ -1,0 +1,13 @@
+{
+  "accepted": ["a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c01", "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c02"],
+  "rejected": [{"id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c08", "reason": "invalid_name"}],
+  "config_etag": "\"1-5e1a\"",
+  "attribution": {
+    "state": "provisional", "network": "meta", "status": "measured", "method": "cpp_deeplink",
+    "campaign_id": null, "campaign": null, "adset_id": null, "adset": null, "ad_id": null, "ad": null,
+    "keyword_id": null, "keyword": null, "link_id": null, "cpp_id": "ce3a1b2c-0000-4000-8000-000000000001",
+    "decided_at": 1760400126000
+  },
+  "needs": [],
+  "cv_hints": []
+}

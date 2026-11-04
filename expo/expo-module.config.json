@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["KerdlySdkModule"]
+  },
+  "android": {
+    "modules": ["com.kerdly.expo.KerdlySdkModule"]
+  }
+}

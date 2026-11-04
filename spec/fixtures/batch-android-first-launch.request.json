@@ -1,0 +1,126 @@
+{
+  "sdk": {
+    "name": "afr-android",
+    "version": "0.1.0"
+  },
+  "app": {
+    "bundle": "com.acme.other",
+    "version": "5.12",
+    "build": "1310",
+    "environment": "production"
+  },
+  "install_id": "4d5e6f7a-8b9c-4d0e-9f1a-2b3c4d5e6f71",
+  "sent_at": 1760400005000,
+  "context": {
+    "platform": "android",
+    "os": "15",
+    "model": "SM-S921B",
+    "manufacturer": "samsung",
+    "locale": "es_US",
+    "languages": [
+      "es-US",
+      "en-US"
+    ],
+    "tz": "America/Los_Angeles",
+    "screen": {
+      "w": 1080,
+      "h": 2340,
+      "scale": 2.625
+    },
+    "att": "not_applicable",
+    "consent": {
+      "analytics": true,
+      "ads": true
+    },
+    "lat": false,
+    "app_version": "5.12",
+    "app_build": "1310"
+  },
+  "events": [
+    {
+      "id": "5e6f7a8b-9c0d-4e1f-8a2b-3c4d5e6f7a81",
+      "name": "$install",
+      "ts": 1760400000100,
+      "seq": 1,
+      "props": {
+        "install_state": "fresh",
+        "installed_at": 1760399960000,
+        "installed_at_source": "package_manager",
+        "first_launch_at": 1760400000100,
+        "installer": "com.android.vending",
+        "initial_url": null,
+        "device": {
+          "platform": "android",
+          "os": "15",
+          "model": "SM-S921B",
+          "manufacturer": "samsung",
+          "locale": "es_US",
+          "languages": [
+            "es-US",
+            "en-US"
+          ],
+          "tz": "America/Los_Angeles",
+          "screen": {
+            "w": 1080,
+            "h": 2340,
+            "scale": 2.625
+          },
+          "att": "not_applicable",
+          "app_version": "5.12",
+          "app_build": "1310"
+        }
+      }
+    },
+    {
+      "id": "6f7a8b9c-0d1e-4f2a-9b3c-4d5e6f7a8b92",
+      "name": "$open",
+      "ts": 1760400000101,
+      "seq": 2,
+      "props": {
+        "reason": "launch"
+      }
+    },
+    {
+      "id": "7a8b9c0d-1e2f-4a3b-8c4d-5e6f7a8b9ca3",
+      "name": "$signal",
+      "ts": 1760400000900,
+      "seq": 3,
+      "props": {
+        "kind": "install_referrer",
+        "status": "ok",
+        "response_code": null,
+        "referrer": "afr_c=k3f9q2xab7mn&utm_source=meta&utm_medium=web2app&utm_campaign=failed3&afr_l=lnk_01&w2a_id=abcd1234efgh5678&lp=failing-exam&cpp=web-meta",
+        "click_ts": 1760399890,
+        "install_begin_ts": 1760399930,
+        "click_server_ts": 1760399891,
+        "install_begin_server_ts": 1760399931,
+        "install_version": "5.12",
+        "instant": false
+      }
+    },
+    {
+      "id": "8b9c0d1e-2f3a-4b4c-9d5e-6f7a8b9c0db4",
+      "name": "$signal",
+      "ts": 1760400001000,
+      "seq": 4,
+      "props": {
+        "kind": "advertising_ids",
+        "gaid": "38400000-8cf0-11bd-b23e-10b96e40000d",
+        "lat": false
+      }
+    },
+    {
+      "id": "9c0d1e2f-3a4b-4c5d-8e6f-7a8b9c0d1ec5",
+      "name": "$signal",
+      "ts": 1760400001100,
+      "seq": 5,
+      "props": {
+        "kind": "meta_install_referrer",
+        "source": "instagram",
+        "install_referrer": "{\"utm_campaign\":\"x\",\"utm_content\":\"{\\\"source\\\":{\\\"data\\\":\\\"abc\\\",\\\"nonce\\\":\\\"def\\\"}}\"}",
+        "is_ct": 1,
+        "actual_timestamp": 1760399880
+      }
+    }
+  ]
+}

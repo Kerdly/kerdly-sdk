@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The vendored com.kerdly.sdk sources need these entries (mirrors android/kerdly-sdk/src/main/AndroidManifest.xml
+     of the native SDK; scripts/sync-native.mjs fails when they drift apart). Merged into the app's manifest. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Google advertising id (GAID) on Android 13+. Apps that must not read it remove it with
+         tools:node="remove" (or expo's android.blockedPermissions) and pass collectAdvertisingId: false. -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+
+    <!-- Package visibility (Android 11+) for the Meta Install Referrer content providers. -->
+    <queries>
+        <package android:name="com.facebook.katana" />
+        <package android:name="com.instagram.android" />
+        <package android:name="com.facebook.lite" />
+    </queries>
+
+</manifest>
