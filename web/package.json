@@ -1,19 +1,31 @@
 {
   "name": "@kerdly/web",
   "version": "0.1.0",
-  "description": "Kerdly web SDK: first-party visitor id, visit and click touches (POST /v1/web/touch), identify (POST /v1/web/identify), link decoration and pixel event ids. Ships the kerdly.js snippet.",
+  "description": "Kerdly web SDK and kerdly.js snippet: first-party visitor ids, ad click and visit attribution, web-to-app links and identify, so you can see which ads pay back.",
   "license": "MIT",
   "author": "Kerdly",
-  "homepage": "https://github.com/Kerdly/kerdly-sdk/tree/main/web#readme",
+  "homepage": "https://kerdly.com",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Kerdly/kerdly-sdk.git",
     "directory": "web"
   },
   "keywords": [
-    "attribution",
-    "analytics",
     "kerdly",
+    "attribution",
+    "mobile-attribution",
+    "first-party-attribution",
+    "app-analytics",
+    "subscription-analytics",
+    "roas",
+    "ltv",
+    "ad-attribution",
+    "web-to-app",
+    "web-attribution",
+    "utm",
+    "click-id",
+    "landing-page",
+    "marketing-analytics",
     "web"
   ],
   "type": "module",
@@ -54,5 +66,8 @@
   "publishConfig": {
     "access": "public",
     "provenance": true
+  },
+  "bugs": {
+    "url": "https://github.com/Kerdly/kerdly-sdk/issues"
   }
 }

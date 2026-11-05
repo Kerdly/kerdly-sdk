@@ -4,6 +4,9 @@ The Kerdly SDK for websites and landing pages. It gives each visitor a first-par
 page visits and clicks on your app links, and passes the visitor on to the app store, so Kerdly
 can connect ad clicks on the web to installs and revenue in your app.
 
+[Kerdly](https://kerdly.com) is profit analytics for subscription apps. The full guide is at
+[kerdly.com/docs/sdks/web](https://kerdly.com/docs/sdks/web).
+
 - [Install](#install)
 - [Options](#options)
 - [API](#api)

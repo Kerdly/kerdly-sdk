@@ -1,13 +1,13 @@
 Pod::Spec.new do |s|
   s.name          = 'KerdlySDK'
   s.version       = '0.1.0'
-  s.summary       = 'Kerdly first-party attribution SDK for iOS (protocol v1).'
+  s.summary       = 'Kerdly SDK for iOS: first-party install attribution, deep links, events and purchases.'
   s.description   = <<~DESC
     Install identity, launch and deep-link events, StoreKit purchase links, AppTransaction and Apple
     Ads token signals, ATT and consent, and the SKAdNetwork / AdAttributionKit writer, delivered to
     the Kerdly collector over protocol v1. The same sources as the Swift package.
   DESC
-  s.homepage      = 'https://github.com/Kerdly/kerdly-sdk'
+  s.homepage      = 'https://kerdly.com/docs'
   s.license       = { :type => 'MIT', :file => 'LICENSE' }
   s.author        = 'Kerdly'
   s.source        = { :git => 'https://github.com/Kerdly/kerdly-sdk.git', :tag => s.version.to_s }

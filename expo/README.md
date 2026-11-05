@@ -4,6 +4,10 @@ The Kerdly SDK for Expo and React Native apps. It runs the native Kerdly SDKs fo
 [iOS](https://github.com/Kerdly/kerdly-sdk/blob/main/ios/README.md) and [Android](https://github.com/Kerdly/kerdly-sdk/blob/main/android/README.md) inside your app, adds a config plugin, and
 captures deep links automatically.
 
+[Kerdly](https://kerdly.com) is profit analytics for subscription apps: it ties each install to the ad
+that brought it and to the store revenue it earns. The full guide is at
+[kerdly.com/docs/sdks/expo](https://kerdly.com/docs/sdks/expo).
+
 It needs a development or production build (`npx expo prebuild` / EAS Build). Expo Go and web do
 not contain the native code: there every call is a no-op, with one development warning. It needs
 Expo SDK 52 or newer (native modules as event emitters) and is developed against SDK 57.

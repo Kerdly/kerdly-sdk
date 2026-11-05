@@ -1,20 +1,36 @@
 {
   "name": "@kerdly/expo",
   "version": "0.1.0",
-  "description": "Kerdly attribution SDK for Expo and React Native: a thin bridge over the native KerdlySDK (iOS) and com.kerdly.sdk (Android) SDKs, plus a config plugin.",
+  "description": "Kerdly SDK for Expo and React Native: first-party install attribution, deep links, events and subscription purchases for iOS and Android, so you can see which ads pay back.",
   "license": "MIT",
   "author": "Kerdly",
-  "homepage": "https://github.com/Kerdly/kerdly-sdk/tree/main/expo#readme",
+  "homepage": "https://kerdly.com",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Kerdly/kerdly-sdk.git",
     "directory": "expo"
   },
   "keywords": [
+    "kerdly",
+    "attribution",
+    "mobile-attribution",
+    "first-party-attribution",
+    "app-analytics",
+    "subscription-analytics",
+    "roas",
+    "ltv",
+    "ad-attribution",
+    "skadnetwork",
+    "deep-linking",
+    "deferred-deep-linking",
+    "apple-search-ads",
+    "install-referrer",
     "react-native",
     "expo",
-    "attribution",
-    "kerdly"
+    "expo-module",
+    "config-plugin",
+    "ios",
+    "android"
   ],
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -71,5 +87,8 @@
   "publishConfig": {
     "access": "public",
     "provenance": true
+  },
+  "bugs": {
+    "url": "https://github.com/Kerdly/kerdly-sdk/issues"
   }
 }

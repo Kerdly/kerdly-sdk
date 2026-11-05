@@ -73,7 +73,7 @@ mavenPublishing {
     coordinates("com.kerdly", "kerdly-sdk", kerdlyVersion)
     pom {
         name.set("Kerdly Android SDK")
-        description.set("First-party install attribution and event collection for Kerdly (protocol v1).")
+        description.set("Kerdly SDK for Android: first-party install attribution, deep links, events and purchases.")
         inceptionYear.set("2026")
         url.set("https://github.com/Kerdly/kerdly-sdk")
         licenses {

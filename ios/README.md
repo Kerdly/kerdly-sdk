@@ -3,6 +3,9 @@
 `KerdlySDK` measures installs, users, events and purchases in your iOS app and sends them to your
 Kerdly project. iOS 15+, Swift 5.9+, no third-party dependencies.
 
+[Kerdly](https://kerdly.com) is profit analytics for subscription apps: it ties each install to the ad
+that brought it and to the store revenue it earns. Docs: [kerdly.com/docs](https://kerdly.com/docs).
+
 - [Install](#install)
 - [Configure](#configure)
 - [Users and consent](#users-and-consent)
