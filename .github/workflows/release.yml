@@ -7,6 +7,7 @@ name: Release
 # Its secrets are readable only by jobs that name it, and its protection rules (required reviewer,
 # deployment tags `[0-9]*`) make each release wait for a maintainer's approval. npm uses trusted
 # publishing (OIDC): no npm token is stored once the packages exist and the trusted publisher is set.
+# The CDN job signs in to Google Cloud the same way (Workload Identity Federation): no key is stored.
 on:
   push:
     tags: ['[0-9]+.[0-9]+.[0-9]+*']
@@ -87,6 +88,41 @@ jobs:
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
 
+  # cdn.kerdly.com: /<version>/kerdly.js for every release and /v1/kerdly.js for the newest one.
+  # Starts with the npm job (one approval covers both) and waits for the version to reach npm,
+  # because every file is rebuilt from the npm releases, never from this checkout.
+  #
+  # Rolling back /v1/:
+  #   - right away: Firebase console → Hosting → the CDN site → Release history → Roll back
+  #   - for good: `npm deprecate @kerdly/web@<bad version> "<reason>"`, then re-run this job from
+  #     the newest release's run. A deprecated release is never `latest`, and its pinned path stays.
+  #
+  # The three CDN_* values are not credentials; they are kept as secrets so the public logs mask them.
+  cdn:
+    needs: check
+    environment: release
+    concurrency: cdn
+    permissions:
+      contents: read
+      id-token: write   # Workload Identity Federation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262   # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020   # v4.4.0
+        with:
+          node-version: 22
+      - run: node --test cdn/*.test.mjs
+      - name: Build every release from npm
+        run: node cdn/build.mjs --expect "${{ github.ref_name }}"
+      - name: Install the Firebase CLI (before any credential exists in this job)
+        run: npm install --global firebase-tools@15.35.0
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093   # v3.0.0
+        with:
+          workload_identity_provider: ${{ secrets.CDN_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.CDN_SERVICE_ACCOUNT }}
+      - name: Deploy
+        run: firebase deploy --only hosting --config cdn/firebase.json --project "${{ secrets.CDN_FIREBASE_PROJECT }}" --non-interactive --message "${{ github.ref_name }}"
+
   github-release:
     needs: [npm, maven-central, cocoapods]
     runs-on: ubuntu-latest
@@ -94,11 +130,24 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: Release with the CHANGELOG section and the kerdly.js snippet
+      - name: Release with the CHANGELOG section and the published kerdly.js
         run: |
-          cd web && npm ci && npm run build && cd ..
-          awk -v v="${{ github.ref_name }}" '$0 ~ "^## " {p = ($2 == v)} p' CHANGELOG.md | tail -n +2 > notes.md
-          gh release create "${{ github.ref_name }}" web/dist/kerdly.js --title "${{ github.ref_name }}" --notes-file notes.md \
-            $([[ "${{ github.ref_name }}" == *-* ]] && echo --prerelease)
+          V="${{ github.ref_name }}"
+          npm pack "@kerdly/web@$V" --silent > /dev/null
+          tar -xzf "kerdly-web-$V.tgz" package/dist/kerdly.js && mv package/dist/kerdly.js kerdly.js
+          SRI="sha384-$(openssl dgst -sha384 -binary kerdly.js | openssl base64 -A)"
+          awk -v v="$V" '$0 ~ "^## " {p = ($2 == v)} p' CHANGELOG.md | tail -n +2 > notes.md
+          {
+            echo
+            echo "### kerdly.js"
+            echo
+            echo "Pinned to this release (the address never changes):"
+            echo
+            echo '```html'
+            echo "<script src=\"https://cdn.kerdly.com/$V/kerdly.js\" integrity=\"$SRI\" crossorigin=\"anonymous\" data-key=\"wk_live_…\" async></script>"
+            echo '```'
+          } >> notes.md
+          gh release create "$V" kerdly.js --title "$V" --notes-file notes.md \
+            $([[ "$V" == *-* ]] && echo --prerelease)
         env:
           GH_TOKEN: ${{ github.token }}

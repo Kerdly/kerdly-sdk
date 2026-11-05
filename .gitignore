@@ -2,3 +2,4 @@
 .build/
 .swiftpm/
 node_modules/
+cdn/public/

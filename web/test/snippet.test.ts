@@ -285,6 +285,14 @@ describe("snippet options", () => {
     expect(endpointFromSrc("not a url")).toBe("");
   });
 
+  it("sends to the Kerdly collector when the script comes from a CDN", () => {
+    expect(endpointFromSrc("https://cdn.kerdly.com/v1/kerdly.js")).toBe("https://app.kerdly.com/api");
+    expect(endpointFromSrc("https://cdn.kerdly.com/0.1.0/kerdly.js")).toBe("https://app.kerdly.com/api");
+    expect(endpointFromSrc("https://cdn.jsdelivr.net/npm/@kerdly/web@0.1.0/dist/kerdly.js")).toBe("https://app.kerdly.com/api");
+    expect(endpointFromSrc("https://unpkg.com/@kerdly/web@0.1.0/dist/kerdly.js")).toBe("https://app.kerdly.com/api");
+    expect(endpointFromSrc("https://cdn.kerdly.com.evil.example/v1/kerdly.js")).toBe("https://cdn.kerdly.com.evil.example/v1");
+  });
+
   it.each([
     [null, true],
     ["", true],

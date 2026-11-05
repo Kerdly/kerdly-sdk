@@ -23,12 +23,32 @@ Pick one. Both behave the same.
 ### The snippet
 
 ```html
-<script src="https://go.example.com/kerdly.js" data-key="wk_live_…" async></script>
+<script src="https://cdn.kerdly.com/v1/kerdly.js" data-key="wk_live_…" async></script>
 ```
 
-Load it from your project's link domain (shown in your Kerdly project's web settings). It records
-a visit for the page, handles clicks on your app links, and exposes the instance as
+It records a visit for the page, handles clicks on your app links, and exposes the instance as
 `window.kerdly`. Because it loads `async`, check that `window.kerdly` exists before calling it.
+
+`/v1/kerdly.js` is always the newest release, so your site gets fixes without a change on your
+side. Every release behind that address stays compatible with the one before it; a change that
+isn't would get a new address (`/v2/`).
+
+To review each update yourself instead, pin a release. Its file never changes, and the
+`integrity` attribute makes the browser refuse anything else:
+
+```html
+<script src="https://cdn.kerdly.com/0.1.0/kerdly.js"
+        integrity="sha384-…" crossorigin="anonymous"
+        data-key="wk_live_…" async></script>
+```
+
+The `integrity` value of every release is in its
+[GitHub release notes](https://github.com/Kerdly/kerdly-sdk/releases) and in
+[cdn.kerdly.com/versions.json](https://cdn.kerdly.com/versions.json). Every file on
+cdn.kerdly.com is the `dist/kerdly.js` of the same `@kerdly/web` release on npm.
+
+If your site sends a Content-Security-Policy, allow `https://cdn.kerdly.com` in `script-src` and
+`https://app.kerdly.com` and `https://api6.ipify.org` (the IPv6 lookup) in `connect-src`.
 
 TypeScript:
 
@@ -57,7 +77,7 @@ server-rendered code; on the server `createKerdly` returns an instance that does
 | Option | Snippet attribute | Default | |
 |---|---|---|---|
 | `key` | `data-key` | required | Your project's public web key (`wk_live_…`). Never use a secret `sk_` key in a page; the SDK refuses it. |
-| `endpoint` | `data-endpoint` | npm: `https://app.kerdly.com/api`; snippet: the domain it was loaded from | Where data is sent. Set it on the snippet only when you host `kerdly.js` somewhere else. |
+| `endpoint` | `data-endpoint` | `https://app.kerdly.com/api` | Where data is sent. A snippet you host yourself sends to the address it was loaded from unless you set this. |
 | `cookieDomain` | `data-cookie-domain` | your site's main domain | Set it if your site is on a shared hosting domain (`*.vercel.app`, `*.github.io`) or an unusual country domain. |
 | `visitorCookie` | `data-visitor-cookie` | `kerdly_vid` | Name an existing first-party id cookie to reuse it. It must be readable by JavaScript (not `HttpOnly`). |
 | `autoVisit` | | `true` | Record a visit when the SDK starts. |

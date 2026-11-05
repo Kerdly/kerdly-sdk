@@ -1,0 +1,30 @@
+{
+  "hosting": {
+    "site": "kerdly-cdn",
+    "public": "public",
+    "cleanUrls": false,
+    "trailingSlash": false,
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          { "key": "Access-Control-Allow-Origin", "value": "*" },
+          { "key": "X-Content-Type-Options", "value": "nosniff" },
+          { "key": "Cross-Origin-Resource-Policy", "value": "cross-origin" }
+        ]
+      },
+      {
+        "regex": "^/v\\d+/kerdly\\.js$",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=300" }]
+      },
+      {
+        "regex": "^/\\d+\\.\\d+\\.\\d+[0-9A-Za-z.-]*/kerdly\\.js$",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      },
+      {
+        "source": "/versions.json",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=300" }]
+      }
+    ]
+  }
+}

@@ -1,20 +1,30 @@
 /**
  * The `kerdly.js` snippet's configuration, read from its own `<script>` tag:
  *
- *   <script src="https://go.example.com/kerdly.js" data-key="wk_live_…" async></script>
+ *   <script src="https://cdn.kerdly.com/v1/kerdly.js" data-key="wk_live_…" async></script>
  *
- * `data-key` (required), `data-endpoint` (default: the URL the script was loaded from, without
- * `/kerdly.js`), `data-cookie-domain`, `data-visitor-cookie`, `data-auto-decorate` (a selector, or
- * `false` to turn it off), `data-ipv6-echo-url` (empty to turn the IPv6 lookup off).
+ * `data-key` (required), `data-endpoint` (default: the Kerdly collector when the script comes from
+ * a CDN, else the URL it was loaded from without `/kerdly.js`), `data-cookie-domain`,
+ * `data-visitor-cookie`, `data-auto-decorate` (a selector, or `false` to turn it off),
+ * `data-ipv6-echo-url` (empty to turn the IPv6 lookup off).
  */
 
+import { DEFAULT_ENDPOINT } from "./client.js";
 import type { KerdlyOptions } from "./types.js";
 
-/** The directory a script was served from, as an endpoint: `https://go.example.com/kerdly.js` → `https://go.example.com`. */
+/** Hosts that serve the snippet but not the collector: the Kerdly CDN and the public npm CDNs. */
+export const CDN_HOSTS = ["cdn.kerdly.com", "cdn.jsdelivr.net", "unpkg.com"];
+
+/**
+ * The endpoint for a script's `src`: the Kerdly collector for a CDN, else the directory the
+ * script was served from (`https://go.example.com/kerdly.js` → `https://go.example.com`).
+ */
 export function endpointFromSrc(src: string | null | undefined): string {
   if (!src) return "";
   try {
-    return new URL(".", src).href.replace(/\/+$/, "");
+    const url = new URL(".", src);
+    if (CDN_HOSTS.indexOf(url.hostname) !== -1) return DEFAULT_ENDPOINT;
+    return url.href.replace(/\/+$/, "");
   } catch {
     return "";
   }

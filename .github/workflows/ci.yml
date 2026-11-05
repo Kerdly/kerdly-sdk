@@ -18,6 +18,8 @@ jobs:
           node-version: 22
       - name: All packages carry the same version
         run: node scripts/version.mjs
+      - name: CDN build helpers
+        run: node --test cdn/*.test.mjs
 
   web:
     runs-on: ubuntu-latest
