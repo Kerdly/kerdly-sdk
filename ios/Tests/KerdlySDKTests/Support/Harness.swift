@@ -72,6 +72,18 @@ final class Harness {
         }
     }
 
+    /// Settles until `done` holds, for up to `timeout` seconds. One `settle()` can return before a
+    /// long chain of queue hops ends on a slow machine (CI); this waits for the state a test needs.
+    @discardableResult
+    func settle(until done: () -> Bool, timeout: TimeInterval = 5) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        settle()
+        while !done() && Date() < deadline {
+            settle()
+        }
+        return done()
+    }
+
     /// Reads queue-confined state.
     func onQueue<T>(_ body: (KerdlyCore) -> T) -> T {
         queue.sync { body(core) }

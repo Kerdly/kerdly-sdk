@@ -81,7 +81,16 @@ jobs:
       - name: Unit tests on the newest iPhone simulator
         run: |
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin)["devices"]; print([x["udid"] for k in sorted(d, reverse=True) if "iOS" in k for x in d[k] if x["name"].startswith("iPhone")][0])')
-          xcodebuild test -scheme KerdlySDK -destination "id=$DEVICE" | tail -n 40
-          exit ${PIPESTATUS[0]}
+          STATUS=0
+          xcodebuild test -scheme KerdlySDK -destination "id=$DEVICE" > xcodebuild.log 2>&1 || STATUS=$?
+          grep -E "error:|: failed|XCTAssert|Failing tests" xcodebuild.log | head -n 100 || true
+          tail -n 40 xcodebuild.log
+          exit $STATUS
+      - name: Keep the full test log of a failed run
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-xcodebuild-log
+          path: xcodebuild.log
       - name: Podspec
         run: pod lib lint KerdlySDK.podspec --allow-warnings

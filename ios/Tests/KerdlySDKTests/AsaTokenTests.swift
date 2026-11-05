@@ -10,12 +10,20 @@ final class AsaTokenTests: XCTestCase {
             .compactMap { $0["props"]?["attempt"]?.int64Value }
     }
 
-    /// Runs the round's two scheduled retries.
+    /// Waits until no token request is in flight, so its retry (if any) is scheduled.
+    private func idle(_ h: Harness) {
+        h.settle(until: { !h.onQueue { $0.asaInFlight } })
+    }
+
+    /// Runs the round's two scheduled retries, once its first try has run.
     private func finishRound(_ h: Harness) {
+        h.settle(until: { h.adServices.calls.get() >= 1 })
         for _ in 0..<2 {
+            idle(h)
             h.scheduler.fire { $0 == KerdlyCore.asaRetryDelay }
             h.settle()
         }
+        idle(h)
     }
 
     func testARoundThatFailsLeavesTheTokenWantedAndAForegroundTriesAgain() {
@@ -29,7 +37,8 @@ final class AsaTokenTests: XCTestCase {
 
         h.adServices.token.set("eyJ0b2tlbiI6Imxhc3QifQ==")
         h.lifecycle.send(.willEnterForeground)
-        h.settle()
+        h.settle(until: { h.adServices.calls.get() >= 4 })
+        idle(h)
         XCTAssertEqual(h.adServices.calls.get(), 4)
         XCTAssertEqual(tokens(h), [1])
         XCTAssertFalse(h.state.asaDue)
@@ -44,9 +53,12 @@ final class AsaTokenTests: XCTestCase {
         h.serveAcceptAll()
         h.adServices.token.set(nil)
         h.configure()
+        h.settle(until: { h.adServices.calls.get() >= 1 })
+        idle(h)
         XCTAssertEqual(h.adServices.calls.get(), 1)
         h.lifecycle.send(.willEnterForeground)
-        h.settle()
+        h.settle(until: { h.adServices.calls.get() >= 2 })
+        idle(h)
         XCTAssertEqual(h.adServices.calls.get(), 2, "the foreground adds one try to the round")
         finishRound(h)
         XCTAssertEqual(h.adServices.calls.get(), 3, "and the round still stops at three failures")
