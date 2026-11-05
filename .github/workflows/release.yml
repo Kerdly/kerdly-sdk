@@ -19,8 +19,9 @@ name: Release
 # publishing (OIDC): no npm token is stored once the packages exist and the trusted publisher is
 # set. The CDN job signs in to Google Cloud the same way (Workload Identity Federation).
 #
-# Nothing runs until the repository variable RELEASES_ENABLED is `true`. "Run workflow" in the
-# Actions tab starts the same check by hand on main.
+# The repository variable RELEASES_ENABLED names the SDKs that may be released: `web`, `web, expo`,
+# or `all`. An SDK left out waits, untagged, and goes out on a later run once it is named. Unset or
+# `false`, nothing runs. "Run workflow" in the Actions tab starts the same check by hand on main.
 on:
   push:
     branches: [main]
@@ -35,7 +36,7 @@ concurrency:
 
 jobs:
   plan:
-    if: vars.RELEASES_ENABLED == 'true'
+    if: vars.RELEASES_ENABLED != '' && vars.RELEASES_ENABLED != 'false'
     runs-on: ubuntu-latest
     outputs:
       ios: ${{ steps.plan.outputs.ios }}
@@ -60,6 +61,8 @@ jobs:
       - run: node scripts/version.mjs
       - id: plan
         run: node scripts/release-plan.mjs --github
+        env:
+          RELEASES_ENABLED: ${{ vars.RELEASES_ENABLED }}
 
   web:
     needs: plan

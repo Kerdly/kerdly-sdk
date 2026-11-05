@@ -6,12 +6,14 @@
 //   node scripts/release-plan.mjs --check    fail on a new version that changes nothing its SDK ships,
 //                                            or that is not above the SDK's last release (CI)
 //   node scripts/release-plan.mjs --github   the same check, then `<sdk>=true|false`, `<sdk>_version`
-//                                            and `<sdk>_tag` for each SDK into $GITHUB_OUTPUT
+//                                            and `<sdk>_tag` for each SDK into $GITHUB_OUTPUT. Only
+//                                            the SDKs named in $RELEASES_ENABLED (`web`, `web, expo`
+//                                            or `all`) are released; the others wait, untagged.
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { ROOT, SDKS, compareVersions, plan, ships, versionOf, versionOnly } from './sdks.mjs';
+import { ROOT, SDKS, compareVersions, enabledSdks, plan, ships, versionOf, versionOnly } from './sdks.mjs';
 
 const git = (...args) => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 26 });
 
@@ -63,16 +65,20 @@ function nextPatch(version) {
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const mode = process.argv[2];
   const plans = planAll();
-  const errors = plans.filter((p) => p.error);
+  const enabled = mode === '--github' ? enabledSdks(process.env.RELEASES_ENABLED) : Object.keys(SDKS);
+  for (const p of plans) if (p.release && !enabled.includes(p.sdk)) p.held = true;
+  const errors = plans.filter((p) => p.error && enabled.includes(p.sdk));
 
-  if (mode === '--github') {
-    if (!errors.length) {
-      const lines = plans.flatMap((p) => [`${p.sdk}=${Boolean(p.release)}`, `${p.sdk}_version=${p.version}`, `${p.sdk}_tag=${p.release ? p.tag : ''}`]);
-      fs.appendFileSync(process.env.GITHUB_OUTPUT, `${lines.join('\n')}\n`);
-    }
+  if (mode === '--github' && !errors.length) {
+    const lines = plans.flatMap((p) => {
+      const go = Boolean(p.release && !p.held);
+      return [`${p.sdk}=${go}`, `${p.sdk}_version=${p.version}`, `${p.sdk}_tag=${go ? p.tag : ''}`];
+    });
+    fs.appendFileSync(process.env.GITHUB_OUTPUT, `${lines.join('\n')}\n`);
   }
   for (const p of plans) {
     if (p.error) console.error(`${p.sdk.padEnd(8)} ${p.error}`);
+    else if (p.held) console.log(`${p.sdk.padEnd(8)} ${p.version}: ready, but waits until RELEASES_ENABLED names ${p.sdk}`);
     else if (p.release) console.log(`${p.sdk.padEnd(8)} ${p.version}: releases as ${p.tag} on main${p.last ? ` (last ${p.last}, ${p.changes.length} shipped files changed)` : ' (first release)'}`);
     else if (p.pending.length) console.log(`${p.sdk.padEnd(8)} ${p.version}: released; ${p.pending.length} shipped files changed since. To release them: node scripts/version.mjs ${p.sdk} ${nextPatch(p.version)}`);
     else console.log(`${p.sdk.padEnd(8)} ${p.version}: released, nothing new`);

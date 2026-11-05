@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { SDKS, compareVersions, plan, ships, versionOnly } from './sdks.mjs';
+import { SDKS, compareVersions, enabledSdks, plan, ships, versionOnly } from './sdks.mjs';
 
 test('each SDK ships its sources but not its tests or docs', () => {
   assert.ok(ships('ios', 'ios/Sources/KerdlySDK/Core/KerdlyCore.swift'));
@@ -79,4 +79,15 @@ test('a version bump alone is not a change', () => {
   assert.ok(versionOnly('web/package.json', pkg('0.1.0'), pkg('0.2.0')));
   assert.ok(!versionOnly('web/package.json', pkg('0.1.0'), pkg('0.2.0').replace('dist', 'lib')));
   assert.ok(!versionOnly('web/src/client.ts', 'a', 'b'));
+});
+
+test('RELEASES_ENABLED names the SDKs that may be released', () => {
+  assert.deepEqual(enabledSdks('web'), ['web']);
+  assert.deepEqual(enabledSdks(' Web, expo '), ['web', 'expo']);
+  assert.deepEqual(enabledSdks('true'), ['ios', 'android', 'web', 'expo']);
+  assert.deepEqual(enabledSdks('all'), ['ios', 'android', 'web', 'expo']);
+  assert.deepEqual(enabledSdks('false'), []);
+  assert.deepEqual(enabledSdks(''), []);
+  assert.deepEqual(enabledSdks(undefined), []);
+  assert.throws(() => enabledSdks('web, swift'), /unknown SDK swift/);
 });

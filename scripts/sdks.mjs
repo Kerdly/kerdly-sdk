@@ -100,6 +100,19 @@ function prefixed(prefix, tag) {
   return SEMVER.test(v) ? v : null;
 }
 
+/**
+ * The SDKs that may be released, from the RELEASES_ENABLED repository variable: `true` or `all` for
+ * every SDK, a list such as `web` or `web, expo`, and nothing when empty or `false`.
+ */
+export function enabledSdks(value) {
+  const words = String(value ?? '').toLowerCase().split(/[\s,]+/).filter(Boolean);
+  if (words.includes('true') || words.includes('all')) return Object.keys(SDKS);
+  const names = words.filter((w) => w !== 'false' && w !== 'none');
+  const unknown = names.filter((w) => !SDKS[w]);
+  if (unknown.length) throw new Error(`RELEASES_ENABLED: unknown SDK ${unknown.join(', ')}; use ${Object.keys(SDKS).join(', ')} or all`);
+  return names;
+}
+
 /** True when a change to `file` (repo-relative) changes what `sdk` ships. */
 export function ships(sdk, file) {
   return SDKS[sdk].paths.some((p) => (p.endsWith('/') ? file.startsWith(p) : file === p))
