@@ -54,8 +54,10 @@ SDK collects on its own.
 
 ## Versions and releases
 
-All four SDKs are released together under one version, tagged in this repository (`0.1.0`, no
-`v`). See [CHANGELOG.md](CHANGELOG.md). Until 1.0, a minor version may change the public API.
+Each SDK has its own version and is released only when it changes. Releases are tagged in this
+repository: iOS with the bare version (`0.1.0`, what Swift Package Manager and CocoaPods resolve),
+the others as `android-v0.1.0`, `expo-v0.1.0` and `web-v0.1.0`. Each SDK's folder has its
+changelog. Until 1.0, a minor version may change the public API.
 
 ## Support
 

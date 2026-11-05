@@ -13,13 +13,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # release tags and the history since
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: All packages carry the same version
+      - name: Each SDK's files agree on its version
         run: node scripts/version.mjs
-      - name: CDN build helpers
-        run: node --test cdn/*.test.mjs
+      - name: A new version comes with a change to what its SDK ships
+        run: node scripts/release-plan.mjs --check
+      - name: Release and CDN scripts
+        run: node --test scripts/*.test.mjs cdn/*.test.mjs
 
   web:
     runs-on: ubuntu-latest

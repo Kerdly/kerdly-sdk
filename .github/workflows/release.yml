@@ -1,105 +1,129 @@
 name: Release
 
-# Push a version tag (e.g. `0.2.0`, no `v`) after `node scripts/version.mjs --set 0.2.0` is merged.
-# SwiftPM resolves the tag itself; this workflow publishes the other registries.
+# Each SDK has its own version. A push to main releases every SDK whose version has no release tag
+# yet, and nothing else. To release an SDK:
 #
-# Credentials: every publishing job runs in the `release` environment (Settings → Environments).
-# Its secrets are readable only by jobs that name it, and its protection rules (required reviewer,
-# deployment tags `[0-9]*`) make each release wait for a maintainer's approval. npm uses trusted
-# publishing (OIDC): no npm token is stored once the packages exist and the trusted publisher is set.
-# The CDN job signs in to Google Cloud the same way (Workload Identity Federation): no key is stored.
+#   node scripts/release-plan.mjs          what changed in each SDK since its last release
+#   node scripts/version.mjs web 0.2.0     the new version, plus a CHANGELOG section to edit
+#
+# then merge to main. CI refuses a new version that changes nothing its SDK ships.
+#
+# Each release job tags the commit first (iOS `0.2.0`, which SwiftPM and CocoaPods resolve; the
+# others `android-v0.2.0`, `expo-v0.2.0`, `web-v0.2.0`), then publishes, then creates the GitHub
+# release from the SDK's CHANGELOG section. If a job fails after tagging, use "Re-run failed jobs":
+# a later push to main does not retry it, because the tag exists.
+#
+# Credentials: every release job runs in the `release` environment (Settings → Environments). Its
+# secrets are readable only by jobs that name it, and its protection rules (required reviewer, the
+# `main` branch only) make each release wait for a maintainer's approval. npm uses trusted
+# publishing (OIDC): no npm token is stored once the packages exist and the trusted publisher is
+# set. The CDN job signs in to Google Cloud the same way (Workload Identity Federation).
+#
+# Nothing runs until the repository variable RELEASES_ENABLED is `true`. "Run workflow" in the
+# Actions tab starts the same check by hand on main.
 on:
   push:
-    tags: ['[0-9]+.[0-9]+.[0-9]+*']
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
-  check:
+  plan:
+    if: vars.RELEASES_ENABLED == 'true'
     runs-on: ubuntu-latest
+    outputs:
+      ios: ${{ steps.plan.outputs.ios }}
+      ios_version: ${{ steps.plan.outputs.ios_version }}
+      ios_tag: ${{ steps.plan.outputs.ios_tag }}
+      android: ${{ steps.plan.outputs.android }}
+      android_version: ${{ steps.plan.outputs.android_version }}
+      android_tag: ${{ steps.plan.outputs.android_tag }}
+      web: ${{ steps.plan.outputs.web }}
+      web_version: ${{ steps.plan.outputs.web_version }}
+      web_tag: ${{ steps.plan.outputs.web_tag }}
+      expo: ${{ steps.plan.outputs.expo }}
+      expo_version: ${{ steps.plan.outputs.expo_version }}
+      expo_tag: ${{ steps.plan.outputs.expo_tag }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # every tag and the history since
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Every package says ${{ github.ref_name }}
-        run: node scripts/version.mjs --check "${{ github.ref_name }}"
+      - run: node scripts/version.mjs
+      - id: plan
+        run: node scripts/release-plan.mjs --github
 
-  npm:
-    needs: check
+  web:
+    needs: plan
+    if: needs.plan.outputs.web == 'true'
     environment: release
     permissions:
-      contents: read
+      contents: write   # the tag and the GitHub release
       id-token: write   # trusted publishing and provenance
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        package: [web, expo]
+    env:
+      VERSION: ${{ needs.plan.outputs.web_version }}
+      RELEASE_TAG: ${{ needs.plan.outputs.web_tag }}
     defaults:
       run:
-        working-directory: ${{ matrix.package }}
+        working-directory: web
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
+      - name: Tag
+        run: git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" > /dev/null || { git tag "$RELEASE_TAG" "$GITHUB_SHA" && git push origin "refs/tags/$RELEASE_TAG"; }
       - run: npm install -g npm@11   # trusted publishing needs npm 11.5+
       - run: npm ci
       - run: npm test
       - name: Publish (pre-releases go to the `next` tag)
-        run: |
-          if [[ "${{ github.ref_name }}" == *-* ]]; then TAG=next; else TAG=latest; fi
-          npm publish --provenance --access public --tag "$TAG"
+        run: npm publish --provenance --access public --tag "$([[ "$VERSION" == *-* ]] && echo next || echo latest)"
         env:
           # Only for the very first publish, before a trusted publisher can be configured on
           # npmjs.com. Delete the secret afterwards; OIDC then needs no token.
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  maven-central:
-    needs: check
-    environment: release
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: android
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-      - uses: gradle/actions/setup-gradle@v4
-      - run: ./gradlew :kerdly-sdk:testDebugUnitTest :kerdly-sdk:publishToMavenCentral --no-configuration-cache
+      - name: GitHub release, with kerdly.js and its integrity value
+        run: |
+          awk -v v="$VERSION" '$0 ~ "^## " {p = ($2 == v)} p' CHANGELOG.md | tail -n +2 > notes.md
+          SRI="sha384-$(openssl dgst -sha384 -binary dist/kerdly.js | openssl base64 -A)"
+          {
+            echo
+            echo "### kerdly.js"
+            echo
+            echo "Pinned to this release (the address never changes):"
+            echo
+            echo '```html'
+            echo "<script src=\"https://cdn.kerdly.com/$VERSION/kerdly.js\" integrity=\"$SRI\" crossorigin=\"anonymous\" data-key=\"wk_live_…\" async></script>"
+            echo '```'
+          } >> notes.md
+          gh release view "$RELEASE_TAG" > /dev/null 2>&1 || gh release create "$RELEASE_TAG" dist/kerdly.js \
+            --title "Web SDK $VERSION" --notes-file notes.md $([[ "$VERSION" == *-* ]] && echo --prerelease)
         env:
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          GH_TOKEN: ${{ github.token }}
 
-  cocoapods:
-    needs: check
-    environment: release
-    runs-on: macos-15
-    steps:
-      - uses: actions/checkout@v4
-      - run: pod trunk push KerdlySDK.podspec --allow-warnings
-        env:
-          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
-
-  # cdn.kerdly.com: /<version>/kerdly.js for every release and /v1/kerdly.js for the newest one.
-  # Starts with the npm job (one approval covers both) and waits for the version to reach npm,
+  # cdn.kerdly.com: /<version>/kerdly.js for every web release and /v1/kerdly.js for the newest one.
+  # Starts with the web job (one approval covers both) and waits for the version to reach npm,
   # because every file is rebuilt from the npm releases, never from this checkout.
   #
   # Rolling back /v1/:
   #   - right away: Firebase console → Hosting → the CDN site → Release history → Roll back
   #   - for good: `npm deprecate @kerdly/web@<bad version> "<reason>"`, then re-run this job from
-  #     the newest release's run. A deprecated release is never `latest`, and its pinned path stays.
+  #     the newest web release's run. A deprecated release is never `latest`; its pinned path stays.
   #
   # The three CDN_* values are not credentials; they are kept as secrets so the public logs mask them.
   cdn:
-    needs: check
+    needs: plan
+    if: needs.plan.outputs.web == 'true'
     environment: release
     concurrency: cdn
     permissions:
@@ -113,7 +137,7 @@ jobs:
           node-version: 22
       - run: node --test cdn/*.test.mjs
       - name: Build every release from npm
-        run: node cdn/build.mjs --expect "${{ github.ref_name }}"
+        run: node cdn/build.mjs --expect "${{ needs.plan.outputs.web_version }}"
       - name: Install the Firebase CLI (before any credential exists in this job)
         run: npm install --global firebase-tools@15.35.0
       - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093   # v3.0.0
@@ -121,33 +145,103 @@ jobs:
           workload_identity_provider: ${{ secrets.CDN_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.CDN_SERVICE_ACCOUNT }}
       - name: Deploy
-        run: firebase deploy --only hosting --config cdn/firebase.json --project "${{ secrets.CDN_FIREBASE_PROJECT }}" --non-interactive --message "${{ github.ref_name }}"
+        run: firebase deploy --only hosting --config cdn/firebase.json --project "${{ secrets.CDN_FIREBASE_PROJECT }}" --non-interactive --message "${{ needs.plan.outputs.web_tag }}"
 
-  github-release:
-    needs: [npm, maven-central, cocoapods]
-    runs-on: ubuntu-latest
+  expo:
+    needs: plan
+    if: needs.plan.outputs.expo == 'true'
+    environment: release
     permissions:
       contents: write
+      id-token: write
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.plan.outputs.expo_version }}
+      RELEASE_TAG: ${{ needs.plan.outputs.expo_tag }}
+    defaults:
+      run:
+        working-directory: expo
     steps:
       - uses: actions/checkout@v4
-      - name: Release with the CHANGELOG section and the published kerdly.js
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - name: Tag
+        run: git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" > /dev/null || { git tag "$RELEASE_TAG" "$GITHUB_SHA" && git push origin "refs/tags/$RELEASE_TAG"; }
+      - run: npm install -g npm@11
+      - run: npm ci
+      - run: npm run sync-native:check
+      - run: npm test
+      - name: Publish (pre-releases go to the `next` tag)
+        run: npm publish --provenance --access public --tag "$([[ "$VERSION" == *-* ]] && echo next || echo latest)"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: GitHub release
         run: |
-          V="${{ github.ref_name }}"
-          npm pack "@kerdly/web@$V" --silent > /dev/null
-          tar -xzf "kerdly-web-$V.tgz" package/dist/kerdly.js && mv package/dist/kerdly.js kerdly.js
-          SRI="sha384-$(openssl dgst -sha384 -binary kerdly.js | openssl base64 -A)"
-          awk -v v="$V" '$0 ~ "^## " {p = ($2 == v)} p' CHANGELOG.md | tail -n +2 > notes.md
-          {
-            echo
-            echo "### kerdly.js"
-            echo
-            echo "Pinned to this release (the address never changes):"
-            echo
-            echo '```html'
-            echo "<script src=\"https://cdn.kerdly.com/$V/kerdly.js\" integrity=\"$SRI\" crossorigin=\"anonymous\" data-key=\"wk_live_…\" async></script>"
-            echo '```'
-          } >> notes.md
-          gh release create "$V" kerdly.js --title "$V" --notes-file notes.md \
-            $([[ "$V" == *-* ]] && echo --prerelease)
+          awk -v v="$VERSION" '$0 ~ "^## " {p = ($2 == v)} p' CHANGELOG.md | tail -n +2 > notes.md
+          gh release view "$RELEASE_TAG" > /dev/null 2>&1 || gh release create "$RELEASE_TAG" \
+            --title "Expo SDK $VERSION" --notes-file notes.md $([[ "$VERSION" == *-* ]] && echo --prerelease)
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  android:
+    needs: plan
+    if: needs.plan.outputs.android == 'true'
+    environment: release
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.plan.outputs.android_version }}
+      RELEASE_TAG: ${{ needs.plan.outputs.android_tag }}
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag
+        run: git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" > /dev/null || { git tag "$RELEASE_TAG" "$GITHUB_SHA" && git push origin "refs/tags/$RELEASE_TAG"; }
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - run: ./gradlew :kerdly-sdk:testDebugUnitTest :kerdly-sdk:publishToMavenCentral --no-configuration-cache
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+      - name: GitHub release
+        run: |
+          awk -v v="$VERSION" '$0 ~ "^## " {p = ($2 == v)} p' CHANGELOG.md | tail -n +2 > notes.md
+          gh release view "$RELEASE_TAG" > /dev/null 2>&1 || gh release create "$RELEASE_TAG" \
+            --title "Android SDK $VERSION" --notes-file notes.md $([[ "$VERSION" == *-* ]] && echo --prerelease)
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  ios:
+    needs: plan
+    if: needs.plan.outputs.ios == 'true'
+    environment: release
+    permissions:
+      contents: write
+    runs-on: macos-15
+    env:
+      VERSION: ${{ needs.plan.outputs.ios_version }}
+      RELEASE_TAG: ${{ needs.plan.outputs.ios_tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag (SwiftPM resolves it; CocoaPods needs it before the push)
+        run: git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" > /dev/null || { git tag "$RELEASE_TAG" "$GITHUB_SHA" && git push origin "refs/tags/$RELEASE_TAG"; }
+      - run: pod trunk push KerdlySDK.podspec --allow-warnings
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+      - name: GitHub release
+        run: |
+          awk -v v="$VERSION" '$0 ~ "^## " {p = ($2 == v)} p' ios/CHANGELOG.md | tail -n +2 > notes.md
+          gh release view "$RELEASE_TAG" > /dev/null 2>&1 || gh release create "$RELEASE_TAG" \
+            --title "iOS SDK $VERSION" --notes-file notes.md $([[ "$VERSION" == *-* ]] && echo --prerelease)
         env:
           GH_TOKEN: ${{ github.token }}

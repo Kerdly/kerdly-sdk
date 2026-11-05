@@ -1,66 +1,47 @@
 #!/usr/bin/env node
-// All four SDKs release together under one version (the git tag, e.g. `0.2.0`, is what SwiftPM
-// resolves). This script reads, checks or sets that version everywhere it is written.
+// Each SDK has its own version. This script reads, checks or sets them.
 //
-//   node scripts/version.mjs              print the version (fails if the files disagree)
-//   node scripts/version.mjs --check X    fail unless every file says X (CI, on a release tag)
-//   node scripts/version.mjs --set X      write X into every file
+//   node scripts/version.mjs                  print each SDK's version (fails if an SDK's files disagree)
+//   node scripts/version.mjs web 0.2.0        set the web SDK's version and open its CHANGELOG section
+//
+// The Expo package carries the iOS and Android SDKs, so a change to either is also an Expo change
+// to release. See release-plan.mjs for what is unreleased.
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { ROOT, SDKS, SEMVER, versionOf, writeVersion } from './sdks.mjs';
+import { lastReleaseTag, shippedCommits } from './release-plan.mjs';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SEMVER = /^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/;
+const [sdk, version] = process.argv.slice(2);
 
-const json = (file, keys) => ({
-  file,
-  get: (text) => keys.map((k) => k.split('.').reduce((o, p) => o?.[p], JSON.parse(text))),
-  set: (text, v) => {
-    const j = JSON.parse(text);
-    for (const k of keys) {
-      const parts = k.split('.');
-      const last = parts.pop();
-      parts.reduce((o, p) => o[p], j)[last] = v;
+if (!sdk) {
+  let failed = false;
+  for (const name of Object.keys(SDKS)) {
+    try {
+      console.log(`${name.padEnd(8)} ${versionOf(name)}`);
+    } catch (e) {
+      console.error(e.message);
+      failed = true;
     }
-    return JSON.stringify(j, null, 2) + '\n';
-  },
-});
-const regex = (file, re) => ({
-  file,
-  get: (text) => [text.match(re)?.[2]],
-  set: (text, v) => text.replace(re, (_, a, _old, b) => `${a}${v}${b}`),
-});
-
-const FILES = [
-  json('web/package.json', ['version']),
-  json('web/package-lock.json', ['version', 'packages..version']),
-  json('expo/package.json', ['version']),
-  json('expo/package-lock.json', ['version', 'packages..version']),
-  regex('expo/src/version.ts', /(SDK_VERSION = ')([^']+)(')/),
-  regex('android/gradle.properties', /(KERDLY_VERSION=)(\S+)()/),
-  regex('KerdlySDK.podspec', /(s\.version\s*=\s*')([^']+)(')/),
-  regex('ios/Sources/KerdlySDK/Core/KerdlyCore.swift', /(static let sdkVersion = ")([^"]+)(")/),
-];
-// `packages..version` is the lockfile's root package (key "").
-for (const f of FILES) if (f.file.endsWith('lock.json')) {
-  f.get = (text) => { const j = JSON.parse(text); return [j.version, j.packages?.['']?.version]; };
-  f.set = (text, v) => { const j = JSON.parse(text); j.version = v; j.packages[''].version = v; return JSON.stringify(j, null, 2) + '\n'; };
-}
-
-const read = (f) => fs.readFileSync(path.join(ROOT, f.file), 'utf8');
-const found = FILES.flatMap((f) => f.get(read(f)).map((v) => [f.file, v]));
-
-const [flag, value] = process.argv.slice(2);
-if (flag === '--set') {
-  if (!SEMVER.test(value || '')) throw new Error(`not a version: ${value}`);
-  for (const f of FILES) fs.writeFileSync(path.join(ROOT, f.file), f.set(read(f), value));
-  console.log(`version ${value} written to ${FILES.length} files`);
-} else {
-  const want = flag === '--check' ? value : found[0][1];
-  const bad = found.filter(([, v]) => v !== want);
-  if (bad.length) {
-    for (const [file, v] of bad) console.error(`${file}: ${v} (expected ${want})`);
-    process.exit(1);
   }
-  console.log(want);
+  process.exit(failed ? 1 : 0);
 }
+
+if (!SDKS[sdk]) throw new Error(`unknown SDK ${sdk}; one of ${Object.keys(SDKS).join(', ')}`);
+if (!SEMVER.test(version || '')) throw new Error(`not a version: ${version}`);
+
+writeVersion(sdk, version);
+console.log(`${sdk} ${version}`);
+
+// A `## <version>` section at the top of the SDK's changelog, listing the commits since its last
+// release that changed what it ships. Edit it into release notes before merging.
+const file = path.join(ROOT, SDKS[sdk].changelog);
+const text = fs.readFileSync(file, 'utf8');
+if (!text.includes(`\n## ${version}\n`)) {
+  const subjects = [...new Set(shippedCommits(sdk, lastReleaseTag(sdk)))];
+  if (sdk === 'expo') subjects.unshift(`Contains iOS SDK ${versionOf('ios')} and Android SDK ${versionOf('android')}.`);
+  const section = `## ${version}\n\n${(subjects.length ? subjects : ['…']).map((s) => `- ${s}`).join('\n')}\n\n`;
+  const at = text.indexOf('\n## ');
+  fs.writeFileSync(file, at === -1 ? `${text.trimEnd()}\n\n${section}` : `${text.slice(0, at + 1)}${section}${text.slice(at + 1)}`);
+  console.log(`${SDKS[sdk].changelog}: added "## ${version}"; edit it before merging`);
+}
+
