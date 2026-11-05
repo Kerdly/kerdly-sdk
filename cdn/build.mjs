@@ -35,15 +35,17 @@ async function registryDocument() {
   }
 }
 
-/** `package/dist/kerdly.js` out of a release's tarball, after checking the tarball's integrity. */
+/**
+ * `package/dist/kerdly.js` out of a release's tarball, after checking the tarball's integrity; null
+ * when the tarball has none (npm's `0.0.0-stage` placeholder for staged publishing, for one).
+ */
 async function snippetOf(version, dist) {
   const res = await fetch(dist.tarball);
   if (!res.ok) throw new Error(`${version}: tarball HTTP ${res.status}`);
   const tarball = Buffer.from(await res.arrayBuffer());
   if (!matchesIntegrity(tarball, dist.integrity)) throw new Error(`${version}: tarball does not match npm's integrity`);
   const tar = spawnSync("tar", ["-xzO", "-f", "-", "package/dist/kerdly.js"], { input: tarball, maxBuffer: 1 << 24 });
-  if (tar.status !== 0 || !tar.stdout.length) throw new Error(`${version}: no dist/kerdly.js in the tarball`);
-  return tar.stdout;
+  return tar.status === 0 && tar.stdout.length ? tar.stdout : null;
 }
 
 const doc = await registryDocument();
@@ -57,6 +59,11 @@ const files = {};
 for (const [version, meta] of Object.entries(doc.versions ?? {})) {
   if (!parseVersion(version)) continue;
   const body = await snippetOf(version, meta.dist);
+  if (!body) {
+    if (version === expect) throw new Error(`${version}: no dist/kerdly.js in the tarball`);
+    console.log(`${version}: no dist/kerdly.js in the tarball; not served`);
+    continue;
+  }
   mkdirSync(join(out, version));
   writeFileSync(join(out, version, "kerdly.js"), body);
   releases.push({ version, deprecated: meta.deprecated });

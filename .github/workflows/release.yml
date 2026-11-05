@@ -26,6 +26,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      cdn:
+        description: Redeploy cdn.kerdly.com from npm (after `npm deprecate`, or to retry)
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -120,13 +125,14 @@ jobs:
   #
   # Rolling back /v1/:
   #   - right away: Firebase console → Hosting → the CDN site → Release history → Roll back
-  #   - for good: `npm deprecate @kerdly/web@<bad version> "<reason>"`, then re-run this job from
-  #     the newest web release's run. A deprecated release is never `latest`; its pinned path stays.
+  #   - for good: `npm deprecate @kerdly/web@<bad version> "<reason>"`, then Actions → Release →
+  #     Run workflow with "Redeploy cdn.kerdly.com" ticked. A deprecated release is never `latest`;
+  #     its pinned path stays.
   #
   # The three CDN_* values are not credentials; they are kept as secrets so the public logs mask them.
   cdn:
     needs: plan
-    if: needs.plan.outputs.web == 'true'
+    if: needs.plan.outputs.web == 'true' || inputs.cdn
     environment: release
     concurrency: cdn
     permissions:
@@ -148,7 +154,7 @@ jobs:
           workload_identity_provider: ${{ secrets.CDN_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.CDN_SERVICE_ACCOUNT }}
       - name: Deploy
-        run: firebase deploy --only hosting --config cdn/firebase.json --project "${{ secrets.CDN_FIREBASE_PROJECT }}" --non-interactive --message "${{ needs.plan.outputs.web_tag }}"
+        run: firebase deploy --only hosting --config cdn/firebase.json --project "${{ secrets.CDN_FIREBASE_PROJECT }}" --non-interactive --message "web ${{ needs.plan.outputs.web_version }}"
 
   expo:
     needs: plan
