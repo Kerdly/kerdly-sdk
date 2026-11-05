@@ -131,6 +131,10 @@ async function configure(options: KerdlyConfigureOptions): Promise<void> {
       devWarn('configure: `endpoint` must be the collector base URL; ignored');
       return;
     }
+    if (key.startsWith('sk_')) {
+      devError('configure: that is a server key (sk_…); apps take their public pk_ key. The SDK stays off');
+      return;
+    }
     if (!/^pk_(live|test)_/.test(key)) {
       devWarn('configure: `key` should be the app public key (pk_live_… / pk_test_…)');
     }
@@ -476,23 +480,18 @@ export interface KerdlyDeferredLinkAnswer {
 }
 
 /**
- * Debug only (iOS): asks Meta (ids from the app's Facebook config) and TikTok (`tiktokAppId`) for
- * this device's deferred deep link and resolves each network's raw answer. Sends nothing to Kerdly.
- * Asks only when the `ads` consent is on, and when tracking is authorized unless `ignoreAtt`: then
- * it asks whatever the ATT status, without the IDFA (Meta through `ep2.facebook.com`) unless
- * tracking is authorized. Android resolves `[]`.
+ * Debug builds only (iOS): asks Meta (ids from the app's Facebook config) and TikTok
+ * (`tiktokAppId`) for this device's deferred deep link and resolves each network's raw answer.
+ * Sends nothing to Kerdly. Asks only when the `ads` consent is on and tracking is authorized. In a
+ * release build it asks nothing and every answer is `error` ("debug builds only"). Android
+ * resolves `[]`.
  */
 async function debugFetchDeferredLinks(
-  options: { tiktokAppId?: string | null; storeAppId?: string | null; ignoreAtt?: boolean } = {},
+  options: { tiktokAppId?: string | null; storeAppId?: string | null } = {},
 ): Promise<KerdlyDeferredLinkAnswer[]> {
   try {
     if (Platform.OS !== 'ios') return [];
-    const answers = await callNative(
-      'debugFetchDeferredLinks',
-      options.tiktokAppId ?? null,
-      options.storeAppId ?? null,
-      options.ignoreAtt === true,
-    );
+    const answers = await callNative('debugFetchDeferredLinks', options.tiktokAppId ?? null, options.storeAppId ?? null);
     return Array.isArray(answers) ? (answers as KerdlyDeferredLinkAnswer[]) : [];
   } catch (error) {
     devWarn('debugFetchDeferredLinks failed:', error);

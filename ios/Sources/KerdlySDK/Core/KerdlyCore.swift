@@ -186,6 +186,10 @@ final class KerdlyCore: @unchecked Sendable {
             log.error("configure: the endpoint must be an http(s) URL; the SDK stays off")
             return false
         }
+        if key.hasPrefix("sk_") {
+            log.error("configure: that is a server key (sk_…); apps take their public pk_ key. The SDK stays off")
+            return false
+        }
         if !key.hasPrefix("pk_") {
             log.warn("configure: the key does not look like a public SDK key (pk_…)")
         }

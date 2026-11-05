@@ -72,7 +72,7 @@ export function createMockNativeModule(Base: typeof ExpoModulesCoreMock.NativeMo
     flush: jest.fn(async (): Promise<void> => undefined),
     getInstallId: jest.fn(async (): Promise<unknown> => '8c1f5d0e-2f3a-4c55-9d7e-1b2c3d4e5f60'),
     debugFetchDeferredLinks: jest.fn(
-      async (_tiktokAppId: unknown, _storeAppId: unknown, _ignoreAtt: unknown): Promise<unknown> => [
+      async (_tiktokAppId: unknown, _storeAppId: unknown): Promise<unknown> => [
         { network: 'meta', status: 'none', httpStatus: 200 },
       ]
     ),

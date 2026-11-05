@@ -71,6 +71,14 @@ describe('configure', () => {
     expect(warn).toHaveBeenCalledTimes(3);
   });
 
+  it('refuses a secret sk_ key', async () => {
+    const { error } = silenceConsole();
+    const { Kerdly, native } = loadSdk();
+    await Kerdly.configure({ key: 'sk_live_abc123', endpoint: ENDPOINT });
+    expect(native!.configure).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('server key (sk_'));
+  });
+
   it('defaults the endpoint to the Kerdly collector', async () => {
     silenceConsole();
     const { Kerdly, native } = loadSdk();
@@ -318,17 +326,17 @@ describe('async calls', () => {
     await expect(Kerdly.getInstallId()).resolves.toBeNull();
   });
 
-  it('debugFetchDeferredLinks passes ignoreAtt to native on iOS only', async () => {
+  it('debugFetchDeferredLinks asks native on iOS only', async () => {
     const ios = loadSdk({ platform: 'ios' });
-    await expect(ios.Kerdly.debugFetchDeferredLinks({ tiktokAppId: '76', ignoreAtt: true })).resolves.toEqual([
+    await expect(ios.Kerdly.debugFetchDeferredLinks({ tiktokAppId: '76' })).resolves.toEqual([
       { network: 'meta', status: 'none', httpStatus: 200 },
     ]);
-    expect(ios.native!.debugFetchDeferredLinks).toHaveBeenLastCalledWith('76', null, true);
+    expect(ios.native!.debugFetchDeferredLinks).toHaveBeenLastCalledWith('76', null);
     await ios.Kerdly.debugFetchDeferredLinks();
-    expect(ios.native!.debugFetchDeferredLinks).toHaveBeenLastCalledWith(null, null, false);
+    expect(ios.native!.debugFetchDeferredLinks).toHaveBeenLastCalledWith(null, null);
 
     const android = loadSdk({ platform: 'android' });
-    await expect(android.Kerdly.debugFetchDeferredLinks({ ignoreAtt: true })).resolves.toEqual([]);
+    await expect(android.Kerdly.debugFetchDeferredLinks({ tiktokAppId: '76' })).resolves.toEqual([]);
     expect(android.native!.debugFetchDeferredLinks).not.toHaveBeenCalled();
   });
 });

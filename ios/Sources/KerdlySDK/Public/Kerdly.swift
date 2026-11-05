@@ -154,14 +154,14 @@ public enum Kerdly {
         core.apiFlush()
     }
 
-    /// Debug only: asks Meta (ids from the bundle's Facebook config) and TikTok (`tiktokAppId`) for
-    /// this device's deferred deep link, and returns each network's raw answer. Sends nothing to
-    /// Kerdly. Asks only when the `ads` consent is on, and when tracking is authorized unless
-    /// `ignoreAtt`: then it asks whatever the ATT status, without the IDFA (Meta through
-    /// `ep2.facebook.com`) unless tracking is authorized. `completion` runs on the SDK's queue.
-    public static func debugFetchDeferredLinks(tiktokAppId: String?, storeAppId: String?, ignoreAtt: Bool = false,
+    /// Debug builds only: asks Meta (ids from the bundle's Facebook config) and TikTok
+    /// (`tiktokAppId`) for this device's deferred deep link, and returns each network's raw answer.
+    /// Sends nothing to Kerdly. Asks only when the `ads` consent is on and tracking is authorized. In
+    /// a release build it asks nothing and every answer is `error` ("debug builds only").
+    /// `completion` runs on the SDK's queue.
+    public static func debugFetchDeferredLinks(tiktokAppId: String?, storeAppId: String?,
                                                completion: @escaping @Sendable ([KerdlyDeferredLinkAnswer]) -> Void) {
-        core.apiDebugFetchDeferredLinks(tiktokAppId: tiktokAppId, storeAppId: storeAppId, ignoreAtt: ignoreAtt) { answers in
+        core.apiDebugFetchDeferredLinks(tiktokAppId: tiktokAppId, storeAppId: storeAppId) { answers in
             completion(answers.map(KerdlyDeferredLinkAnswer.init))
         }
     }

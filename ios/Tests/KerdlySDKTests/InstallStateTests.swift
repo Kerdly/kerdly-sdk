@@ -84,6 +84,18 @@ final class InstallStateTests: XCTestCase {
         h.queuedEvents.first { $0.name == "$install" }
     }
 
+    func testASecretKeyLeavesTheSdkOff() {
+        let log = KerdlyLogger()
+        XCTAssertFalse(KerdlyCore.validate(Harness.options { $0.key = "sk_live_123" }, log: log))
+        XCTAssertTrue(KerdlyCore.validate(Harness.options(), log: log))
+
+        let h = Harness()
+        h.configure { $0.key = "sk_live_123" }
+        XCTAssertNil(h.core.installIdBox.get())
+        XCTAssertTrue(h.queuedEvents.isEmpty)
+        XCTAssertTrue(h.transport.sent.isEmpty)
+    }
+
     func testConfigureRow1EnqueuesOnlyOpen() {
         let h = launch(keychain: x, defaults: x)
         XCTAssertNil(installEvent(h))

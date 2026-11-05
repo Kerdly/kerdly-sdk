@@ -193,10 +193,11 @@ public final class KerdlySdkModule: ExpoModulesCore.Module {
     }
     .runOnQueue(.main)
 
-    // Debug only: each network's raw answer to a deferred-deep-link request; sends nothing to Kerdly.
+    // Debug builds only: each network's raw answer to a deferred-deep-link request; sends nothing to
+    // Kerdly. A release build answers `error` for each network and asks nothing.
     ExpoModulesCore.AsyncFunction("debugFetchDeferredLinks") {
-      (tiktokAppId: String?, storeAppId: String?, ignoreAtt: Bool, promise: ExpoModulesCore.Promise) in
-      Kerdly.debugFetchDeferredLinks(tiktokAppId: tiktokAppId, storeAppId: storeAppId, ignoreAtt: ignoreAtt) { answers in
+      (tiktokAppId: String?, storeAppId: String?, promise: ExpoModulesCore.Promise) in
+      Kerdly.debugFetchDeferredLinks(tiktokAppId: tiktokAppId, storeAppId: storeAppId) { answers in
         promise.resolve(answers.map { answer -> [String: Any] in
           var out: [String: Any] = ["network": answer.network, "status": answer.status]
           if let url = answer.url { out["url"] = url }

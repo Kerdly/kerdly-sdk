@@ -155,21 +155,25 @@ extension KerdlyCore {
     // MARK: - Debug
 
     /// Debug: asks Meta and TikTok for this device's deferred deep link and hands back their raw
-    /// answers. Enqueues nothing and ignores the config's `ddl` block. Asks only with the `ads`
-    /// consent on, and with tracking authorized unless `ignoreAtt`: then it asks whatever the ATT
-    /// status, without the IDFA (Meta through `ep2`) unless tracking is authorized and iOS gives it.
+    /// answers. Enqueues nothing and ignores the config's `ddl` block. Answers only in a debug build
+    /// (`DEBUG`): a release build gets an `error` answer per network and asks nothing. Asks only with
+    /// the `ads` consent on and tracking authorized, as the SDK itself does.
     ///
     /// Not behind `run`: it works before, or without, `configure`, so a build with no Kerdly key can
     /// still test the networks.
-    func apiDebugFetchDeferredLinks(tiktokAppId: String?, storeAppId: String?, ignoreAtt: Bool = false,
+    func apiDebugFetchDeferredLinks(tiktokAppId: String?, storeAppId: String?,
                                     completion: @escaping @Sendable ([DdlAnswer]) -> Void) {
         let device = deps.device
         DispatchQueue.main.async { [self] in
             let fresh = MainActor.assumeIsolated { device.snapshot() }
             queue.async { [self] in
                 let networks = [MetaDdl.network, TikTokDdl.network]
+                guard device.environmentInputs().isDebugBuild else {
+                    completion(networks.map { DdlAnswer.skipped($0, .error, "debug builds only") })
+                    return
+                }
                 let att = deps.tracking.status()
-                guard att == .authorized || ignoreAtt else {
+                guard att == .authorized else {
                     completion(networks.map { DdlAnswer.skipped($0, .skippedAtt) })
                     return
                 }
@@ -187,13 +191,11 @@ extension KerdlyCore {
                         completion(answers + networks.filter { !asked.contains($0) }.map { DdlAnswer.skipped($0, .notConfigured) })
                     }
                 }
-                guard att == .authorized else { return ask("") }
                 let provider = deps.advertisingId
                 deps.workQueue.async { [self] in
                     let idfa = provider.advertisingId()
                     queue.async {
                         if let idfa, !idfa.isEmpty { return ask(idfa) }
-                        if ignoreAtt { return ask("") }
                         completion(networks.map { DdlAnswer.skipped($0, .skippedAtt, "no IDFA") })
                     }
                 }

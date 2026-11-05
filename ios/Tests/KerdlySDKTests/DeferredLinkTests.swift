@@ -297,10 +297,13 @@ final class DeferredLinkTests: XCTestCase {
 
     // MARK: Debug
 
-    func debugAnswers(_ h: Harness, ignoreAtt: Bool) -> [DdlAnswer] {
+    func debugAnswers(_ h: Harness, debugBuild: Bool = true) -> [DdlAnswer] {
+        var inputs = h.device.environment.get()
+        inputs.isDebugBuild = debugBuild
+        h.device.environment.set(inputs)
         let done = expectation(description: "answers")
         let answers = Locked<[DdlAnswer]>([])
-        h.core.apiDebugFetchDeferredLinks(tiktokAppId: "7600000000000000001", storeAppId: nil, ignoreAtt: ignoreAtt) {
+        h.core.apiDebugFetchDeferredLinks(tiktokAppId: "7600000000000000001", storeAppId: nil) {
             answers.set($0)
             done.fulfill()
         }
@@ -308,24 +311,35 @@ final class DeferredLinkTests: XCTestCase {
         return answers.get()
     }
 
-    func testDebugSkipsWithoutTrackingUnlessToldToIgnoreIt() throws {
-        let h = try harness(att: .denied)
-        XCTAssertEqual(debugAnswers(h, ignoreAtt: false).map(\.status), [.skippedAtt, .skippedAtt])
-        XCTAssertEqual(networkRequests(h), [])
-
-        let answers = debugAnswers(h, ignoreAtt: true)
+    func testDebugAsksTheNetworksInADebugBuild() throws {
+        let h = try harness()
+        let answers = debugAnswers(h)
         XCTAssertEqual(answers.map(\.network), ["meta", "tiktok"])
         XCTAssertEqual(answers.map(\.status), [.link, .none])
-        XCTAssertEqual(Set(networkRequests(h)), ["ep2.facebook.com", "analytics.us.tiktok.com"])
+        XCTAssertEqual(Set(networkRequests(h)), ["ep1.facebook.com", "analytics.us.tiktok.com"])
+    }
+
+    func testDebugAsksNothingInAReleaseBuild() throws {
+        let h = try harness()
+        let answers = debugAnswers(h, debugBuild: false)
+        XCTAssertEqual(answers.map(\.status), [.error, .error])
+        XCTAssertEqual(answers.map(\.detail), ["debug builds only", "debug builds only"])
+        XCTAssertEqual(networkRequests(h), [])
         XCTAssertEqual(h.advertisingId.calls.get(), 0)
     }
 
-    func testDebugIgnoringAttWithoutAnIdfaUsesTheShapeWithoutTracking() throws {
+    func testDebugNeverAsksWithoutTracking() throws {
+        let h = try harness(att: .denied)
+        XCTAssertEqual(debugAnswers(h).map(\.status), [.skippedAtt, .skippedAtt])
+        XCTAssertEqual(networkRequests(h), [])
+        XCTAssertEqual(h.advertisingId.calls.get(), 0)
+    }
+
+    func testDebugNeverAsksWithoutAnIdfa() throws {
         let h = try harness(att: .authorized)
         h.advertisingId.idfa.set(nil)
-        XCTAssertEqual(debugAnswers(h, ignoreAtt: false).map(\.detail), ["no IDFA", "no IDFA"])
-        _ = debugAnswers(h, ignoreAtt: true)
-        XCTAssertEqual(Set(networkRequests(h)), ["ep2.facebook.com", "analytics.us.tiktok.com"])
+        XCTAssertEqual(debugAnswers(h).map(\.detail), ["no IDFA", "no IDFA"])
+        XCTAssertEqual(networkRequests(h), [])
     }
 
     func testTheAdsConsentGatesIt() throws {

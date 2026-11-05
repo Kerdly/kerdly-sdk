@@ -87,7 +87,7 @@ export interface KerdlySdkNativeModule {
   requestTrackingAuthorization(): Promise<unknown>;
   flush(): Promise<void>;
   getInstallId(): Promise<unknown>;
-  debugFetchDeferredLinks(tiktokAppId: string | null, storeAppId: string | null, ignoreAtt: boolean): Promise<unknown>;
+  debugFetchDeferredLinks(tiktokAppId: string | null, storeAppId: string | null): Promise<unknown>;
   addListener(eventName: typeof ATTRIBUTION_EVENT, listener: (payload: unknown) => void): {
     remove(): void;
   };
