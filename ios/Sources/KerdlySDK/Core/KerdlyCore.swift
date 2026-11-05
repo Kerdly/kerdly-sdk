@@ -5,10 +5,13 @@ import Foundation
 /// system hops back onto it. The few values public getters read from any thread live in `Locked`
 /// boxes. Nothing here throws into the app.
 final class KerdlyCore: @unchecked Sendable {
-    static let sdkName = "afr-ios"
+    static let sdkName = "kerdly-ios"
     static let sdkVersion = "0.1.0"
-    static let defaultsInstallIdKey = "com.afr.sdk.install_id"
-    static let defaultsKeychainFailedKey = "com.afr.sdk.keychain_write_failed"
+    static let defaultsInstallIdKey = "com.kerdly.sdk.install_id"
+    static let defaultsKeychainFailedKey = "com.kerdly.sdk.keychain_write_failed"
+    /// The same two keys as builds before 0.1.0 named them; `migrateLegacyDefaults` moves them once.
+    static let legacyDefaultsInstallIdKey = "com.afr.sdk.install_id"
+    static let legacyDefaultsKeychainFailedKey = "com.afr.sdk.keychain_write_failed"
     static let foregroundOpenThreshold: TimeInterval = 30 * 60
     static let maxPreStartCalls = 200
     static let maxEventBytes = 64 * 1_024
@@ -202,8 +205,25 @@ final class KerdlyCore: @unchecked Sendable {
         resolveInstall(at: at)
     }
 
+    /// An app updating from a build before 0.1.0 keeps its install id: the UserDefaults copy (and
+    /// the Keychain failure flag) move to the current keys once; the current keys win.
+    func migrateLegacyDefaults() {
+        let defaults = deps.defaults
+        if let legacyId = defaults.string(forKey: Self.legacyDefaultsInstallIdKey) {
+            if defaults.string(forKey: Self.defaultsInstallIdKey) == nil {
+                defaults.set(legacyId, forKey: Self.defaultsInstallIdKey)
+            }
+            defaults.set(nil as String?, forKey: Self.legacyDefaultsInstallIdKey)
+        }
+        if defaults.bool(forKey: Self.legacyDefaultsKeychainFailedKey) {
+            defaults.set(true, forKey: Self.defaultsKeychainFailedKey)
+            defaults.set(nil as String?, forKey: Self.legacyDefaultsKeychainFailedKey)
+        }
+    }
+
     /// Install identity and state, then the launch's reserved events.
     func resolveInstall(at: Date) {
+        migrateLegacyDefaults()
         let decision = InstallIdentityResolver.decide(
             keychain: deps.keychain.readInstallId(),
             defaults: deps.defaults.string(forKey: Self.defaultsInstallIdKey),

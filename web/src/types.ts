@@ -18,14 +18,14 @@ export interface KerdlyOptions {
    */
   cookieDomain?: string;
   /**
-   * Name of the visitor id cookie. Default `afr_vid`. Name an existing first-party id cookie to
+   * Name of the visitor id cookie. Default `kerdly_vid`. Name an existing first-party id cookie to
    * reuse its value as the visitor id; it must be readable by page script (not `HttpOnly`).
    */
   visitorCookie?: string;
   /** Send a `visit` touch from `createKerdly`. Default `true`. */
   autoVisit?: boolean;
   /**
-   * Anchors to decorate with `afr_v` and count as clicks: a CSS selector, `true` for the default
+   * Anchors to decorate with `kerdly_v` and count as clicks: a CSS selector, `true` for the default
    * `a[data-kerdly-link]`, or `false` to turn it off. Default `true`.
    */
   autoDecorate?: string | boolean;
@@ -51,9 +51,9 @@ export interface Kerdly {
    * this page is a no-op unless `force` is set. Returns whether a touch was handed to the browser.
    */
   visit(options?: KerdlyVisitOptions): boolean;
-  /** Send a `click` touch with `link` = `url`, and return `url` decorated with `afr_v`. */
+  /** Send a `click` touch with `link` = `url`, and return `url` decorated with `kerdly_v`. */
   click(url: string): string;
-  /** Return `url` with `afr_v=<visitor id>` in its query; other parameters are kept as written. */
+  /** Return `url` with `kerdly_v=<visitor id>` in its query; other parameters are kept as written. */
   decorate(url: string): string;
   /** `<visitor id>:<name>`, the event id shared by pixel and server events so they dedupe. */
   eventId(name: string): string;
@@ -61,7 +61,7 @@ export interface Kerdly {
    * Link this visitor to the site's own user id (for example your auth provider's uid), so events
    * your server reports under that user id are credited to this visitor's touches: sends
    * `POST <endpoint>/v1/web/identify`. A repeat of the last pair sent (kept in `localStorage` as
-   * `afr_uid`) is a no-op, also on later page loads; a different user id sends again. `userId` must
+   * `kerdly_uid`) is a no-op, also on later page loads; a different user id sends again. `userId` must
    * be a non-empty string of at most 128 characters. Returns whether a request was handed to the
    * browser.
    */
@@ -91,7 +91,7 @@ export interface KerdlyTouch {
   url: string;
   referrer: string | null;
   title: string | null;
-  /** The `afr_v` parameter of the page URL, when this page continues a chain. */
+  /** The `kerdly_v` parameter of the page URL, when this page continues a chain. */
   chain_from: string | null;
   /** The URL the click goes to (`kind: "click"`); `null` for a visit. */
   link: string | null;

@@ -1,6 +1,6 @@
 {
   "sdk": {
-    "name": "afr-ios",
+    "name": "kerdly-ios",
     "version": "0.1.0",
     "wrapper": "expo/0.1.0"
   },
@@ -50,8 +50,8 @@
         "click_ts": 1760396400000,
         "cpp": null,
         "ppid": null,
-        "afr_c": null,
-        "afr_v": null,
+        "kerdly_c": null,
+        "kerdly_v": null,
         "campaign_ids": null,
         "http_status": 200,
         "detail": null,
@@ -72,8 +72,8 @@
         "click_ts": null,
         "cpp": null,
         "ppid": null,
-        "afr_c": null,
-        "afr_v": null,
+        "kerdly_c": null,
+        "kerdly_v": null,
         "campaign_ids": null,
         "http_status": 200,
         "detail": null,

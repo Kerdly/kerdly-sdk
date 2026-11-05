@@ -19,13 +19,13 @@ extension KerdlyCore {
         }
         var headers = [
             "Authorization": "Bearer \(options?.key.trimmingCharacters(in: .whitespacesAndNewlines) ?? "")",
-            "X-Afr-Bundle": appInfo.bundle,
-            "X-Afr-Sdk": sdk,
+            "X-Kerdly-Bundle": appInfo.bundle,
+            "X-Kerdly-Sdk": sdk,
             "Content-Type": "application/json",
             "Accept": "application/json",
         ]
-        if !appInfo.version.isEmpty { headers["X-Afr-App-Version"] = appInfo.version }
-        if !appInfo.build.isEmpty { headers["X-Afr-App-Build"] = appInfo.build }
+        if !appInfo.version.isEmpty { headers["X-Kerdly-App-Version"] = appInfo.version }
+        if !appInfo.build.isEmpty { headers["X-Kerdly-App-Build"] = appInfo.build }
         return headers
     }
 

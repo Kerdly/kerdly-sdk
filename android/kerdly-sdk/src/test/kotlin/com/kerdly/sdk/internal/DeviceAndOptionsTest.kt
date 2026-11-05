@@ -119,8 +119,8 @@ class DeviceAndOptionsTest {
 
     @Test
     fun theSdkHeader() {
-        assertEquals("afr-android/${SdkInfo.VERSION}", SdkInfo.header(null))
-        assertEquals("afr-android/${SdkInfo.VERSION} expo/0.1.0", SdkInfo.header("expo/0.1.0"))
+        assertEquals("kerdly-android/${SdkInfo.VERSION}", SdkInfo.header(null))
+        assertEquals("kerdly-android/${SdkInfo.VERSION} expo/0.1.0", SdkInfo.header("expo/0.1.0"))
         assertTrue(SdkInfo.VERSION.matches(Regex("^\\d+\\.\\d+\\.\\d+.*")))
     }
 

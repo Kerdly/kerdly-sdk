@@ -30,9 +30,9 @@ class KerdlyApiTest {
 
     @Test
     fun handleUrlParsesAtOnce() {
-        val link = Kerdly.handleUrl("https://acme-app.com/onboarding?cpp=web-meta&afr_c=k3f9")!!
+        val link = Kerdly.handleUrl("https://acme-app.com/onboarding?cpp=web-meta&kerdly_c=k3f9")!!
         assertEquals("web-meta", link.cpp)
-        assertEquals("k3f9", link.afrC)
+        assertEquals("k3f9", link.clickId)
         assertNull(Kerdly.handleUrl("  "))
     }
 

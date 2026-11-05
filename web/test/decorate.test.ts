@@ -7,43 +7,49 @@ const VID = "q3k9m2x7a8b4c5d6e7f8g9";
 
 describe("decorateUrl", () => {
   it.each([
-    ["https://go.acme-app.com/k3f9q2x", `https://go.acme-app.com/k3f9q2x?afr_v=${VID}`],
-    ["https://go.acme-app.com/k3f9q2x?src=hero", `https://go.acme-app.com/k3f9q2x?src=hero&afr_v=${VID}`],
-    ["https://go.acme-app.com/k3f9q2x?src=hero#top", `https://go.acme-app.com/k3f9q2x?src=hero&afr_v=${VID}#top`],
-    ["https://go.acme-app.com/k3f9q2x#/route?x=1", `https://go.acme-app.com/k3f9q2x?afr_v=${VID}#/route?x=1`],
-    ["https://go.acme-app.com/k3f9q2x?", `https://go.acme-app.com/k3f9q2x?afr_v=${VID}`],
-    ["/app?lp=failing-exam", `/app?lp=failing-exam&afr_v=${VID}`],
-    ["//go.acme-app.com/k3f9q2x", `//go.acme-app.com/k3f9q2x?afr_v=${VID}`],
+    ["https://go.acme-app.com/k3f9q2x", `https://go.acme-app.com/k3f9q2x?kerdly_v=${VID}`],
+    ["https://go.acme-app.com/k3f9q2x?src=hero", `https://go.acme-app.com/k3f9q2x?src=hero&kerdly_v=${VID}`],
+    ["https://go.acme-app.com/k3f9q2x?src=hero#top", `https://go.acme-app.com/k3f9q2x?src=hero&kerdly_v=${VID}#top`],
+    ["https://go.acme-app.com/k3f9q2x#/route?x=1", `https://go.acme-app.com/k3f9q2x?kerdly_v=${VID}#/route?x=1`],
+    ["https://go.acme-app.com/k3f9q2x?", `https://go.acme-app.com/k3f9q2x?kerdly_v=${VID}`],
+    ["/app?lp=failing-exam", `/app?lp=failing-exam&kerdly_v=${VID}`],
+    ["//go.acme-app.com/k3f9q2x", `//go.acme-app.com/k3f9q2x?kerdly_v=${VID}`],
   ])("%s", (url, expected) => {
     expect(decorateUrl(url, VID)).toBe(expected);
   });
 
   it("keeps the other parameters exactly as written", () => {
     const url = "https://go.acme-app.com/k3f9q2x?utm_campaign=Spring%20Sale&q=a+b&empty=&flag&utm_campaign=dup";
-    expect(decorateUrl(url, VID)).toBe(`${url}&afr_v=${VID}`);
+    expect(decorateUrl(url, VID)).toBe(`${url}&kerdly_v=${VID}`);
   });
 
-  it("is idempotent and never adds a second afr_v", () => {
+  it("is idempotent and never adds a second kerdly_v", () => {
     const once = decorateUrl("https://go.acme-app.com/k3f9q2x?src=hero", VID);
     expect(decorateUrl(once, VID)).toBe(once);
     expect(decorateUrl(decorateUrl(once, VID), VID)).toBe(once);
-    expect(once.match(/afr_v=/g)).toHaveLength(1);
+    expect(once.match(/kerdly_v=/g)).toHaveLength(1);
   });
 
   it("leaves a URL that already carries this id where it is", () => {
-    const url = `https://go.acme-app.com/k3f9q2x?afr_v=${VID}&src=hero`;
+    const url = `https://go.acme-app.com/k3f9q2x?kerdly_v=${VID}&src=hero`;
     expect(decorateUrl(url, VID)).toBe(url);
   });
 
-  it("replaces another visitor's afr_v, and collapses duplicates", () => {
+  it("replaces an afr_v parameter (links made before 0.1.0) with kerdly_v", () => {
     expect(decorateUrl("https://go.acme-app.com/k3f9q2x?afr_v=someoneelse&src=hero", VID)).toBe(
-      `https://go.acme-app.com/k3f9q2x?src=hero&afr_v=${VID}`,
+      `https://go.acme-app.com/k3f9q2x?src=hero&kerdly_v=${VID}`,
     );
-    expect(decorateUrl(`https://go.acme-app.com/x?afr_v=${VID}&afr_v=${VID}`, VID)).toBe(`https://go.acme-app.com/x?afr_v=${VID}`);
+  });
+
+  it("replaces another visitor's kerdly_v, and collapses duplicates", () => {
+    expect(decorateUrl("https://go.acme-app.com/k3f9q2x?kerdly_v=someoneelse&src=hero", VID)).toBe(
+      `https://go.acme-app.com/k3f9q2x?src=hero&kerdly_v=${VID}`,
+    );
+    expect(decorateUrl(`https://go.acme-app.com/x?kerdly_v=${VID}&kerdly_v=${VID}`, VID)).toBe(`https://go.acme-app.com/x?kerdly_v=${VID}`);
   });
 
   it("encodes an id that needs it", () => {
-    expect(decorateUrl("https://go.acme-app.com/x", "a b&c")).toBe("https://go.acme-app.com/x?afr_v=a%20b%26c");
+    expect(decorateUrl("https://go.acme-app.com/x", "a b&c")).toBe("https://go.acme-app.com/x?kerdly_v=a%20b%26c");
   });
 
   it("never touches non-http URLs", () => {
@@ -60,28 +66,28 @@ describe("decorateUrl", () => {
 
 describe("withQueryParam with null", () => {
   it("removes the parameter and nothing else", () => {
-    expect(withQueryParam(`https://go.acme-app.com/x?a=1&afr_v=${VID}#h`, "afr_v", null)).toBe("https://go.acme-app.com/x?a=1#h");
-    expect(withQueryParam(`https://go.acme-app.com/x?afr_v=${VID}`, "afr_v", null)).toBe("https://go.acme-app.com/x");
-    expect(withQueryParam("https://go.acme-app.com/x?a=1&&b=2", "afr_v", null)).toBe("https://go.acme-app.com/x?a=1&&b=2");
+    expect(withQueryParam(`https://go.acme-app.com/x?a=1&kerdly_v=${VID}#h`, "kerdly_v", null)).toBe("https://go.acme-app.com/x?a=1#h");
+    expect(withQueryParam(`https://go.acme-app.com/x?kerdly_v=${VID}`, "kerdly_v", null)).toBe("https://go.acme-app.com/x");
+    expect(withQueryParam("https://go.acme-app.com/x?a=1&&b=2", "kerdly_v", null)).toBe("https://go.acme-app.com/x?a=1&&b=2");
   });
 });
 
 describe("Kerdly.decorate, click and eventId", () => {
   beforeEach(() => {
     resetPage();
-    document.cookie = `afr_vid=${VID}; Path=/`;
+    document.cookie = `kerdly_vid=${VID}; Path=/`;
   });
 
   it("decorates with the visitor id", () => {
     const kerdly = createKerdly({ key: "wk_live_example", endpoint: "https://go.acme-app.com", autoVisit: false, autoDecorate: false });
-    expect(kerdly.decorate("https://go.acme-app.com/k3f9q2x")).toBe(`https://go.acme-app.com/k3f9q2x?afr_v=${VID}`);
-    expect(kerdly.decorate(kerdly.decorate("https://go.acme-app.com/k3f9q2x"))).toBe(`https://go.acme-app.com/k3f9q2x?afr_v=${VID}`);
+    expect(kerdly.decorate("https://go.acme-app.com/k3f9q2x")).toBe(`https://go.acme-app.com/k3f9q2x?kerdly_v=${VID}`);
+    expect(kerdly.decorate(kerdly.decorate("https://go.acme-app.com/k3f9q2x"))).toBe(`https://go.acme-app.com/k3f9q2x?kerdly_v=${VID}`);
   });
 
   it("click sends the link as given and returns it decorated", async () => {
     const beacon = stubBeacon();
     const kerdly = createKerdly({ key: "wk_live_example", endpoint: "https://go.acme-app.com", autoVisit: false, autoDecorate: false });
-    expect(kerdly.click("https://go.acme-app.com/k3f9q2x?src=hero")).toBe(`https://go.acme-app.com/k3f9q2x?src=hero&afr_v=${VID}`);
+    expect(kerdly.click("https://go.acme-app.com/k3f9q2x?src=hero")).toBe(`https://go.acme-app.com/k3f9q2x?src=hero&kerdly_v=${VID}`);
     const [touch] = await beaconTouches(beacon);
     expect(touch).toMatchObject({ kind: "click", link: "https://go.acme-app.com/k3f9q2x?src=hero", visitor_id: VID });
     expect(kerdly.click("")).toBe("");

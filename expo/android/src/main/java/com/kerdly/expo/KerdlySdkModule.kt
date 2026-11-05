@@ -232,8 +232,8 @@ class KerdlySdkModule : Module() {
       "url" to link.url,
       "cpp" to link.cpp,
       "ppid" to link.ppid,
-      "afrC" to link.afrC,
-      "afrV" to link.afrV,
+      "clickId" to link.clickId,
+      "visitId" to link.visitId,
       "campaignIds" to link.campaignIds,
     )
 

@@ -24,7 +24,7 @@ describe("touch payload", () => {
     setReferrer(FIXTURE.referrer ?? "");
     document.title = FIXTURE.title ?? "";
     document.cookie = `_fbp=${FIXTURE.cookies.fbp}; Path=/`;
-    document.cookie = `afr_vid=${FIXTURE.visitor_id}; Path=/`;
+    document.cookie = `kerdly_vid=${FIXTURE.visitor_id}; Path=/`;
     vi.spyOn(Date, "now").mockReturnValue(FIXTURE.ts);
     vi.spyOn(crypto, "randomUUID").mockReturnValue(FIXTURE.event_id as ReturnType<Crypto["randomUUID"]>);
     const beacon = stubBeacon();
@@ -76,7 +76,16 @@ describe("touch payload", () => {
     expect(typeof visit?.ts).toBe("number");
   });
 
-  it("takes chain_from from the page's afr_v parameter", async () => {
+  it("takes chain_from from the page's kerdly_v parameter", async () => {
+    history.replaceState(null, "", "/lp/failing-exam?kerdly_v=7h3k9q2x7a8b4c&src=qr");
+    const beacon = stubBeacon();
+    createKerdly({ key: "wk_live_example", endpoint: "https://go.acme-app.com", autoDecorate: false });
+    const [visit] = await beaconTouches(beacon);
+    expect(visit?.chain_from).toBe("7h3k9q2x7a8b4c");
+    expect(visit?.url).toBe("https://acme-app.com/lp/failing-exam?kerdly_v=7h3k9q2x7a8b4c&src=qr");
+  });
+
+  it("takes chain_from from the page's afr_v parameter (links made before 0.1.0)", async () => {
     history.replaceState(null, "", "/lp/failing-exam?afr_v=7h3k9q2x7a8b4c&src=qr");
     const beacon = stubBeacon();
     createKerdly({ key: "wk_live_example", endpoint: "https://go.acme-app.com", autoDecorate: false });
@@ -142,7 +151,7 @@ describe("visit", () => {
     const noKey = createKerdly({ key: "", endpoint: "https://go.acme-app.com", autoDecorate: false });
     const secret = createKerdly({ key: "sk_live_oops", endpoint: "https://go.acme-app.com", autoDecorate: false });
     expect(noKey.visit({ force: true })).toBe(false);
-    expect(noKey.click("https://go.acme-app.com/k3f9q2x")).toMatch(/afr_v=/);
+    expect(noKey.click("https://go.acme-app.com/k3f9q2x")).toMatch(/kerdly_v=/);
     expect(secret.visit({ force: true })).toBe(false);
     expect(beacon).not.toHaveBeenCalled();
     expect(warn).toHaveBeenCalledTimes(2);

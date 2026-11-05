@@ -46,14 +46,19 @@ public struct KerdlyOptions: Sendable {
 /// What `handleUrl` parsed from a URL's query string. Each field is nil when absent.
 public struct KerdlyDeepLink: Sendable, Equatable {
     public let url: URL
-    public let cpp: String?, ppid: String?, afrC: String?, afrV: String?, campaignIds: String?
+    public let cpp: String?, ppid: String?
+    /// The click id of the Kerdly link that opened the app (`kerdly_c`).
+    public let clickId: String?
+    /// The web visit that link continues (`kerdly_v`).
+    public let visitId: String?
+    public let campaignIds: String?
 
-    init(url: URL, cpp: String?, ppid: String?, afrC: String?, afrV: String?, campaignIds: String?) {
+    init(url: URL, cpp: String?, ppid: String?, clickId: String?, visitId: String?, campaignIds: String?) {
         self.url = url
         self.cpp = cpp
         self.ppid = ppid
-        self.afrC = afrC
-        self.afrV = afrV
+        self.clickId = clickId
+        self.visitId = visitId
         self.campaignIds = campaignIds
     }
 }

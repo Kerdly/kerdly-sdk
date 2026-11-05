@@ -33,7 +33,7 @@ android {
   defaultConfig {
     versionCode 1
     versionName packageJson.version
-    // As in kerdly-sdk/build.gradle.kts: the native SDK version, sent in `sdk.version` and `X-Afr-Sdk`.
+    // As in kerdly-sdk/build.gradle.kts: the native SDK version, sent in `sdk.version` and `X-Kerdly-Sdk`.
     buildConfigField 'String', 'KERDLY_VERSION', "\"${sdkProperties.getProperty('KERDLY_VERSION')}\""
     // The SDK's consumer R8 rules, when it ships any.
     def sdkRules = new File(vendoredSdk, 'consumer-rules.pro')

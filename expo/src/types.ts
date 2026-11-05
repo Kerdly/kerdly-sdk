@@ -47,8 +47,10 @@ export interface KerdlyDeepLink {
   url: string;
   cpp: string | null;
   ppid: string | null;
-  afrC: string | null;
-  afrV: string | null;
+  /** The click id of the Kerdly link that opened the app (`kerdly_c`). */
+  clickId: string | null;
+  /** The web visit that link continues (`kerdly_v`). */
+  visitId: string | null;
   campaignIds: string | null;
 }
 

@@ -1,9 +1,11 @@
 /**
- * URL helpers: reading a page parameter and decorating link URLs with `afr_v`.
+ * URL helpers: reading a page parameter and decorating link URLs with `kerdly_v`.
  */
 
 /** The visit-chain parameter: a link decorated with it continues this visitor's chain. */
-export const VISIT_PARAM = "afr_v";
+export const VISIT_PARAM = "kerdly_v";
+/** The same parameter as links made before 0.1.0 spell it: read, never written. */
+export const LEGACY_VISIT_PARAM = "afr_v";
 
 const ANY_SCHEME = /^[a-z][a-z\d+.-]*:/i;
 const HTTP_SCHEME = /^https?:/i;
@@ -41,7 +43,17 @@ export function withQueryParam(url: string, name: string, value: string | null):
   return base + (kept.length ? `?${kept.join("&")}` : "") + hash;
 }
 
-/** `url` with `afr_v=<visitor id>`; idempotent, and never two `afr_v` parameters. */
+/** The visit a page URL continues: its `kerdly_v` parameter, else its `afr_v`. */
+export function visitParam(search: string): string | null {
+  return queryParam(search, VISIT_PARAM) || queryParam(search, LEGACY_VISIT_PARAM);
+}
+
+/** `url` without any visit parameter, in either spelling. */
+export function withoutVisitParam(url: string): string {
+  return withQueryParam(withQueryParam(url, LEGACY_VISIT_PARAM, null), VISIT_PARAM, null);
+}
+
+/** `url` with `kerdly_v=<visitor id>`; idempotent, and never two visit parameters. */
 export function decorateUrl(url: string, visitorId: string): string {
-  return visitorId ? withQueryParam(url, VISIT_PARAM, visitorId) : url;
+  return visitorId ? withQueryParam(withQueryParam(url, LEGACY_VISIT_PARAM, null), VISIT_PARAM, visitorId) : url;
 }

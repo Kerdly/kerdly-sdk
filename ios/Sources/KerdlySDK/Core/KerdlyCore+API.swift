@@ -76,8 +76,8 @@ extension KerdlyCore {
         guard let parsed = DeepLinkParser.parse(url) else { return nil }
         let at = now
         run { [self] in handleDeepLink(parsed, source: source, at: at) }
-        return KerdlyDeepLink(url: url, cpp: parsed.cpp, ppid: parsed.ppid, afrC: parsed.afrC,
-                           afrV: parsed.afrV, campaignIds: parsed.campaignIds)
+        return KerdlyDeepLink(url: url, cpp: parsed.cpp, ppid: parsed.ppid, clickId: parsed.clickId,
+                           visitId: parsed.visitId, campaignIds: parsed.campaignIds)
     }
 
     func apiSetAppAccountToken(_ token: UUID?) {

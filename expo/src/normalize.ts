@@ -43,8 +43,8 @@ export function normalizeDeepLink(payload: unknown): KerdlyDeepLink | null {
     url,
     cpp: str(payload, 'cpp'),
     ppid: str(payload, 'ppid'),
-    afrC: str(payload, 'afrC', 'afr_c'),
-    afrV: str(payload, 'afrV', 'afr_v'),
+    clickId: str(payload, 'clickId', 'kerdly_c'),
+    visitId: str(payload, 'visitId', 'kerdly_v'),
     campaignIds: str(payload, 'campaignIds', 'campaign_ids'),
   };
 }

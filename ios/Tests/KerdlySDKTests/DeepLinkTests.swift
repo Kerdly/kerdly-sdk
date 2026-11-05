@@ -11,17 +11,29 @@ final class DeepLinkTests: XCTestCase {
         let link = try XCTUnwrap(parse("com.acme.app://onboarding?cpp=california&ppid=ce3a1b2c-0000-4000-8000-000000000001"))
         XCTAssertEqual(link.cpp, "california")
         XCTAssertEqual(link.ppid, "ce3a1b2c-0000-4000-8000-000000000001")
-        XCTAssertNil(link.afrC)
+        XCTAssertNil(link.clickId)
         XCTAssertTrue(link.isAttributionBearing)
     }
 
     func testParamsAreReadWhateverTheSchemeHostOrPath() throws {
-        let universal = try XCTUnwrap(parse("https://go.acme-app.com/l/abc?afr_c=k3f9q2xab7mn&afr_v=v123&utm_source=meta"))
-        XCTAssertEqual(universal.afrC, "k3f9q2xab7mn")
-        XCTAssertEqual(universal.afrV, "v123")
+        let universal = try XCTUnwrap(parse("https://go.acme-app.com/l/abc?kerdly_c=k3f9q2xab7mn&kerdly_v=v123&utm_source=meta"))
+        XCTAssertEqual(universal.clickId, "k3f9q2xab7mn")
+        XCTAssertEqual(universal.visitId, "v123")
+        XCTAssertEqual(universal.props["kerdly_c"], .string("k3f9q2xab7mn"))
+        XCTAssertEqual(universal.props["kerdly_v"], .string("v123"))
         let appLink = try XCTUnwrap(parse("acmeapp://acme-app.com/lp/failing-exam?campaign_ids=ARFkbV9lbmM%3D&x=1"))
         XCTAssertEqual(appLink.campaignIds, "ARFkbV9lbmM=")
         XCTAssertFalse(appLink.isAttributionBearing, "campaign_ids alone is kept but not pending")
+    }
+
+    func testLinksMadeBefore010AreReadUnderTheirAfrNames() throws {
+        let old = try XCTUnwrap(parse("https://go.acme-app.com/l/abc?afr_c=k3f9q2xab7mn&afr_v=v123"))
+        XCTAssertEqual(old.clickId, "k3f9q2xab7mn")
+        XCTAssertEqual(old.visitId, "v123")
+        XCTAssertTrue(old.isAttributionBearing)
+        XCTAssertNil(old.props["afr_c"])
+        let both = try XCTUnwrap(parse("acmeapp://open?afr_c=oldoldoldold&kerdly_c=k3f9q2xab7mn"))
+        XCTAssertEqual(both.clickId, "k3f9q2xab7mn", "the current name wins")
     }
 
     func testAbsentAndEmptyParamsAreNil() throws {
@@ -110,7 +122,7 @@ final class DeepLinkTests: XCTestCase {
         let keychain = FakeKeychain(), defaults = FakeDefaults(), files = InMemoryFiles(), ids = SequentialIds()
         let first = Harness(keychain: keychain, defaults: defaults, files: files, ids: ids)
         first.configure()
-        _ = first.core.apiHandleUrl(URL(string: "acmeapp://open?afr_c=k3f9q2xab7mn")!)
+        _ = first.core.apiHandleUrl(URL(string: "acmeapp://open?kerdly_c=k3f9q2xab7mn")!)
         first.settle()
         let original = try XCTUnwrap(first.state.pendingDeepLinks.first)
         // The app dies; the queue file is lost but the pending copy survives.

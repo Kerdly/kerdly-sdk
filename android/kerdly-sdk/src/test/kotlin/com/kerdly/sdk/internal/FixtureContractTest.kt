@@ -71,7 +71,7 @@ class FixtureContractTest {
         val fixture = Spec.json("batch-android-first-launch.request.json")
         val batch = firstLaunchBatch()
 
-        assertEquals("afr-android", batch.getJSONObject("sdk").getString("name"))
+        assertEquals("kerdly-android", batch.getJSONObject("sdk").getString("name"))
         assertEquals(SdkInfo.VERSION, batch.getJSONObject("sdk").getString("version"))
         assertFalse(batch.getJSONObject("sdk").has("wrapper"))
         assertTrue(jsonEquals(fixture.getJSONObject("app"), batch.getJSONObject("app")))

@@ -232,8 +232,8 @@ public final class KerdlySdkModule: ExpoModulesCore.Module {
       "url": link.url.absoluteString,
       "cpp": orNull(link.cpp),
       "ppid": orNull(link.ppid),
-      "afrC": orNull(link.afrC),
-      "afrV": orNull(link.afrV),
+      "clickId": orNull(link.clickId),
+      "visitId": orNull(link.visitId),
       "campaignIds": orNull(link.campaignIds),
     ]
   }

@@ -211,7 +211,7 @@ internal class FakePlatform : Platform {
     companion object {
         /** The fixture's referrer, as Play reports it. */
         val FIXTURE_REFERRER = PlayReferrerDetails.of(
-            referrer = "afr_c=k3f9q2xab7mn&utm_source=meta&utm_medium=web2app&utm_campaign=failed3&afr_l=lnk_01&w2a_id=abcd1234efgh5678&lp=failing-exam&cpp=web-meta",
+            referrer = "kerdly_c=k3f9q2xab7mn&utm_source=meta&utm_medium=web2app&utm_campaign=failed3&kerdly_l=lnk_01&w2a_id=abcd1234efgh5678&lp=failing-exam&cpp=web-meta",
             clickTs = 1_760_399_890,
             installBeginTs = 1_760_399_930,
             clickServerTs = 1_760_399_891,

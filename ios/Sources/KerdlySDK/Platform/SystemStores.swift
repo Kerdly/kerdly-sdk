@@ -1,23 +1,38 @@
 import Foundation
 import Security
 
-/// The Keychain copy of the install id: a generic password, service `com.afr.sdk`, account
+/// The Keychain copy of the install id: a generic password, service `com.kerdly.sdk`, account
 /// `install_id`, `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, not synchronizable. It survives
 /// an uninstall and never moves to another device.
 final class SystemKeychain: KeychainStoring {
-    static let service = "com.afr.sdk"
+    static let service = "com.kerdly.sdk"
+    /// The service builds before 0.1.0 used. Its item is read when the current one is missing, and
+    /// copied to the current service; it is never changed or deleted.
+    static let legacyService = "com.afr.sdk"
     static let account = "install_id"
 
-    private var baseQuery: [String: Any] {
+    private func itemQuery(service: String) -> [String: Any] {
         [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: Self.service,
+            kSecAttrService as String: service,
             kSecAttrAccount as String: Self.account,
         ]
     }
 
+    private var baseQuery: [String: Any] { itemQuery(service: Self.service) }
+
     func readInstallId() -> KeychainRead {
-        var query = baseQuery
+        let current = read(service: Self.service)
+        guard current == .notFound else { return current }
+        let legacy = read(service: Self.legacyService)
+        if case .found(let id) = legacy {
+            _ = writeInstallId(id)
+        }
+        return legacy
+    }
+
+    private func read(service: String) -> KeychainRead {
+        var query = itemQuery(service: service)
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
         var item: CFTypeRef?
@@ -70,14 +85,33 @@ final class SystemDefaults: DefaultsStoring, @unchecked Sendable {
     }
 }
 
-/// `Application Support/afr/`; every write is atomic (write to a temporary file, then rename).
+/// `Application Support/kerdly/`; every write is atomic (write to a temporary file, then rename).
 final class SystemFileStore: FileStoring {
     private let directory: URL?
     private let created = Locked(false)
 
-    init(folder: String = "afr") {
-        directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
-            .appendingPathComponent(folder, isDirectory: true)
+    /// `legacyFolder`: where builds before 0.1.0 kept the same files. When only it exists, it is
+    /// renamed to `folder`, or used where it is if it cannot be, so an updated app keeps its state
+    /// and queued events.
+    init(folder: String = "kerdly", legacyFolder: String? = "afr") {
+        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+        let target = base?.appendingPathComponent(folder, isDirectory: true)
+        directory = Self.adoptLegacy(base: base, target: target, legacyFolder: legacyFolder)
+    }
+
+    private static func adoptLegacy(base: URL?, target: URL?, legacyFolder: String?) -> URL? {
+        guard let base, let target, let legacyFolder else { return target }
+        let legacy = base.appendingPathComponent(legacyFolder, isDirectory: true)
+        let fileManager = FileManager.default
+        guard !fileManager.fileExists(atPath: target.path), fileManager.fileExists(atPath: legacy.path) else {
+            return target
+        }
+        do {
+            try fileManager.moveItem(at: legacy, to: target)
+            return target
+        } catch {
+            return legacy
+        }
     }
 
     func read(_ name: String) -> Data? {

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Everything the SDK remembers between launches (`Application Support/afr/state.json`).
+/// Everything the SDK remembers between launches (`Application Support/kerdly/state.json`).
 ///
 /// The file is included in device backups, so a backup restored onto another phone brings it back
 /// along with the UserDefaults copy of the id, and the restore mints a new install id. Fields are
@@ -154,7 +154,7 @@ struct DdlNetworkState: Codable, Equatable, Sendable {
     var failures = 0
 }
 
-/// The queue file (`Application Support/afr/queue.json`), tagged with the install id it belongs to.
+/// The queue file (`Application Support/kerdly/queue.json`), tagged with the install id it belongs to.
 struct QueueFile: Codable, Equatable, Sendable {
     var version = 1
     var installId: String

@@ -4,7 +4,7 @@ import { beaconTouches, resetPage, stubBeacon } from "./helpers.js";
 
 const VID = "q3k9m2x7a8b4c5d6e7f8g9";
 const LINK = "https://go.acme-app.com/k3f9q2x?utm_campaign=failed3";
-const DECORATED = `${LINK}&afr_v=${VID}`;
+const DECORATED = `${LINK}&kerdly_v=${VID}`;
 
 /**
  * Listeners added in one test stay on the document, so each test decorates its own attribute
@@ -47,7 +47,7 @@ function press(target: Element, init: MouseEventInit & { type?: "click" | "auxcl
 beforeEach(() => {
   resetPage();
   document.body.innerHTML = "";
-  document.cookie = `afr_vid=${VID}; Path=/`;
+  document.cookie = `kerdly_vid=${VID}; Path=/`;
 });
 
 describe("autoDecorate", () => {

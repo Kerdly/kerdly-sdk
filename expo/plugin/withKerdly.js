@@ -25,7 +25,9 @@ const META_APP_ID_KEY = 'com.kerdly.sdk.META_APP_ID';
  * The id goes through a string resource: a literal `android:value="1234567890123456"` is compiled
  * as a number, not a string, and `Bundle.getString` would not return it.
  */
-const META_APP_ID_STRING = 'afr_meta_app_id';
+const META_APP_ID_STRING = 'kerdly_meta_app_id';
+/** The same string as plugin builds before 0.1.0 named it: always removed. */
+const LEGACY_META_APP_ID_STRING = 'afr_meta_app_id';
 
 /**
  * @typedef {object} KerdlyPluginProps
@@ -122,6 +124,7 @@ function applyMetaAppIdToManifest(manifest, metaAppId) {
  * @param {string | null} metaAppId
  */
 function applyMetaAppIdToStrings(strings, metaAppId) {
+  strings = AndroidConfig.Strings.removeStringItem(LEGACY_META_APP_ID_STRING, strings);
   if (metaAppId !== null) {
     const item = AndroidConfig.Resources.buildResourceItem({ name: META_APP_ID_STRING, value: metaAppId, translatable: false });
     return AndroidConfig.Strings.setStringItem([item], strings);

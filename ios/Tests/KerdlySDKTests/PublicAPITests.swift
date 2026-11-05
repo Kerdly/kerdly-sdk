@@ -56,7 +56,7 @@ final class PublicAPITests: XCTestCase {
             Kerdly.handleUrl(URL(string: "acmeapp://open")!)
             Kerdly.handleUrl(URL(string: "acmeapp://open?cpp=x")!, source: "initial")
             _ = Kerdly.handleUrl(URL(string: "acmeapp://open")!, source: nil)
-            _ = (link?.url, link?.cpp, link?.ppid, link?.afrC, link?.afrV, link?.campaignIds)
+            _ = (link?.url, link?.cpp, link?.ppid, link?.clickId, link?.visitId, link?.campaignIds)
             Kerdly.setAppAccountToken(UUID())
             Kerdly.setAppAccountToken(nil)
             Kerdly.setPartnerIds(["meta_anon_id": "x"])

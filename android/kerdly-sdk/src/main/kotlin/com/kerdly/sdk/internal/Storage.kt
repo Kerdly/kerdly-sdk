@@ -7,8 +7,18 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.util.UUID
 
+/** The SDK's directory under `base` (`noBackupFilesDir`): `kerdly/`. Builds before 0.1.0 used
+ * `afr/`; when only that one exists it is renamed, or used where it is if it cannot be, so an
+ * updated app keeps its install id and queued events. */
+internal fun sdkDirectory(base: File): File {
+    val dir = File(base, "kerdly")
+    val legacy = File(base, "afr")
+    if (dir.exists() || !legacy.isDirectory) return dir
+    return if (legacy.renameTo(dir)) dir else legacy
+}
+
 /** Files in one directory, each replaced atomically (write a temp file, fsync, rename). On
- * Android the directory is `noBackupFilesDir/afr/`, which Auto Backup never copies, so a
+ * Android the directory is `noBackupFilesDir/kerdly/`, which Auto Backup never copies, so a
  * restore cannot bring back an old install id. */
 internal class FileStore(private val dir: File) : Store {
     override fun read(name: String): String? {

@@ -2,7 +2,7 @@ import { flushPromises, loadSdk, silenceConsole } from './helpers';
 
 const OPTIONS = { key: 'pk_test_abc123', endpoint: 'https://sdk.example.com' };
 const INITIAL = 'com.acme.app://onboarding?cpp=web-meta&ppid=ce3a1b2c-0000-4000-8000-000000000001';
-const RUNTIME = 'https://go.acme-app.com/l/abc?afr_c=click123';
+const RUNTIME = 'https://go.acme-app.com/l/abc?kerdly_c=click123';
 
 describe('automatic deep-link capture (autoDeepLinks, default on)', () => {
   it('forwards the initial URL once with source "initial", after native configure', async () => {

@@ -6,7 +6,7 @@
 
 export const DEFAULT_IPV6_ECHO_URL = "https://api6.ipify.org?format=json";
 /** The `sessionStorage` key of the tab session's outcome: the address, or `""` when there is none. */
-export const IPV6_STORAGE_KEY = "afr_ip6";
+export const IPV6_STORAGE_KEY = "kerdly_ip6";
 export const IPV6_TIMEOUT_MS = 3000;
 
 /** The lookup of this page, on `window` so that every instance on the page shares one. */

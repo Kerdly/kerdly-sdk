@@ -35,6 +35,28 @@ class StorageTest {
     }
 
     @Test
+    fun theSdkDirectoryIsKerdlyAndAdoptsTheAfrDirectoryOfBuildsBefore010() {
+        val fresh = tmp.newFolder("fresh")
+        assertEquals(File(fresh, "kerdly"), sdkDirectory(fresh))
+        assertFalse("nothing is created until a write", File(fresh, "kerdly").exists())
+
+        val updated = tmp.newFolder("updated")
+        val oldId = "4d5e6f7a-8b9c-4d0e-9f1a-2b3c4d5e6f71"
+        assertTrue(InstallId.persist(FileStore(File(updated, "afr")), oldId))
+        val dir = sdkDirectory(updated)
+        assertEquals(File(updated, "kerdly"), dir)
+        assertFalse(File(updated, "afr").exists())
+        val loaded = InstallId.load(FileStore(dir))
+        assertFalse(loaded.created)
+        assertEquals(oldId, loaded.id)
+
+        val both = tmp.newFolder("both")
+        assertTrue(File(both, "kerdly").mkdirs() && File(both, "afr").mkdirs())
+        assertEquals(File(both, "kerdly"), sdkDirectory(both))
+        assertTrue("an afr directory next to kerdly is left alone", File(both, "afr").isDirectory)
+    }
+
+    @Test
     fun theInstallIdIsCreatedOnceAndReused() {
         val store = FileStore(tmp.newFolder("kerdly"))
         val first = InstallId.load(store)

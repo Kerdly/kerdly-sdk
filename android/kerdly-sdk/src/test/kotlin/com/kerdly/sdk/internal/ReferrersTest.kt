@@ -20,7 +20,7 @@ class ReferrersTest {
         assertEquals("install_referrer", p.getString("kind"))
         assertEquals("ok", p.getString("status"))
         assertTrue(p.isNull("response_code"))
-        assertTrue(p.getString("referrer").startsWith("afr_c=k3f9q2xab7mn&utm_source=meta"))
+        assertTrue(p.getString("referrer").startsWith("kerdly_c=k3f9q2xab7mn&utm_source=meta"))
         assertEquals(1_760_399_890L, p.getLong("click_ts"))
         assertEquals(1_760_399_931L, p.getLong("install_begin_server_ts"))
         assertEquals("5.12", p.getString("install_version"))

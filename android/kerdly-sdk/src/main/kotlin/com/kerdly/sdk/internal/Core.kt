@@ -689,11 +689,11 @@ internal class Core(
     private fun headers(json: Boolean): MutableMap<String, String> {
         val h = LinkedHashMap<String, String>()
         h["Authorization"] = "Bearer ${cfg.key}"
-        h["X-Afr-Bundle"] = app.bundle
-        h["X-Afr-Sdk"] = SdkInfo.header(cfg.wrapper)
+        h["X-Kerdly-Bundle"] = app.bundle
+        h["X-Kerdly-Sdk"] = SdkInfo.header(cfg.wrapper)
         // The app's version picks the config Kerdly serves (its version rules).
-        app.version?.takeIf { it.isNotEmpty() }?.let { h["X-Afr-App-Version"] = it }
-        app.build?.takeIf { it.isNotEmpty() }?.let { h["X-Afr-App-Build"] = it }
+        app.version?.takeIf { it.isNotEmpty() }?.let { h["X-Kerdly-App-Version"] = it }
+        app.build?.takeIf { it.isNotEmpty() }?.let { h["X-Kerdly-App-Build"] = it }
         h["Accept"] = "application/json"
         if (json) h["Content-Type"] = "application/json"
         return h

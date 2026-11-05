@@ -38,8 +38,10 @@ data class KerdlyDeepLink(
     val url: String,
     val cpp: String?,
     val ppid: String?,
-    val afrC: String?,
-    val afrV: String?,
+    /** The click id of the Kerdly link that opened the app (`kerdly_c`). */
+    val clickId: String?,
+    /** The web visit that link continues (`kerdly_v`). */
+    val visitId: String?,
     val campaignIds: String?,
 )
 

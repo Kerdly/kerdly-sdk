@@ -59,7 +59,7 @@ server-rendered code; on the server `createKerdly` returns an instance that does
 | `key` | `data-key` | required | Your project's public web key (`wk_live_…`). Never use a secret `sk_` key in a page; the SDK refuses it. |
 | `endpoint` | `data-endpoint` | npm: `https://app.kerdly.com/api`; snippet: the domain it was loaded from | Where data is sent. Set it on the snippet only when you host `kerdly.js` somewhere else. |
 | `cookieDomain` | `data-cookie-domain` | your site's main domain | Set it if your site is on a shared hosting domain (`*.vercel.app`, `*.github.io`) or an unusual country domain. |
-| `visitorCookie` | `data-visitor-cookie` | `afr_vid` | Name an existing first-party id cookie to reuse it. It must be readable by JavaScript (not `HttpOnly`). |
+| `visitorCookie` | `data-visitor-cookie` | `kerdly_vid` | Name an existing first-party id cookie to reuse it. It must be readable by JavaScript (not `HttpOnly`). |
 | `autoVisit` | | `true` | Record a visit when the SDK starts. |
 | `autoDecorate` | `data-auto-decorate` | `a[data-kerdly-link]` | Which links are app links: a CSS selector, or `false` to turn it off. |
 | `ipv6EchoUrl` | `data-ipv6-echo-url` | on | Improves matching on mobile networks. `null` (or an empty attribute) turns it off. |
@@ -114,10 +114,10 @@ ttq.track("ViewContent", {}, { event_id: kerdly.eventId("ViewContent") });
 
 | Name | Where | Lifetime | Purpose |
 |---|---|---|---|
-| `afr_vid` (or your `visitorCookie`) | first-party cookie | 400 days (7 days in Safari for script-set cookies) | The visitor id |
+| `kerdly_vid` (or your `visitorCookie`) | first-party cookie | 400 days (7 days in Safari for script-set cookies) | The visitor id |
 | `_fbc` | first-party cookie | 90 days | Meta's click cookie, written when the page URL has an `fbclid`, the same way Meta's pixel does |
-| `afr_uid` | `localStorage` | until cleared | Remembers the last `identify`, so it is not sent twice |
-| `afr_ip6` | `sessionStorage` | the tab session | The result of the IPv6 lookup |
+| `kerdly_uid` | `localStorage` | until cleared | Remembers the last `identify`, so it is not sent twice |
+| `kerdly_ip6` | `sessionStorage` | the tab session | The result of the IPv6 lookup |
 
 The SDK reads Meta's `_fbp` and TikTok's `_ttp` cookies but never writes them. Cookies are
 `SameSite=Lax`, and `Secure` on https pages.

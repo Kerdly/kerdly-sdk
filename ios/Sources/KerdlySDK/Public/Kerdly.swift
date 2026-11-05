@@ -75,7 +75,7 @@ public enum Kerdly {
     }
 
     /// Records a URL the app was opened with (`$deeplink`) and returns the params parsed from its
-    /// query string: `cpp`, `ppid`, `afr_c`, `afr_v`, `campaign_ids`. Call it from every URL entry
+    /// query string: `cpp`, `ppid`, `kerdly_c`, `kerdly_v`, `campaign_ids`. Call it from every URL entry
     /// point (`application(_:open:options:)`, `scene(_:openURLContexts:)`, universal links).
     ///
     /// `source`: `"initial"` for the URL that launched the app, `"runtime"` for a later one. Nil (or

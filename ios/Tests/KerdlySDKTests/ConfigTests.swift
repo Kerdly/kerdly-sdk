@@ -124,8 +124,8 @@ final class ConfigTests: XCTestCase {
         h.settle()
         for path in ["/v1/sdk/config", "/v1/sdk/batch"] {
             let request = try XCTUnwrap(h.transport.requests(path: path).first, path)
-            XCTAssertEqual(request.headers["X-Afr-App-Version"], "5.12", path)
-            XCTAssertEqual(request.headers["X-Afr-App-Build"], "131", path)
+            XCTAssertEqual(request.headers["X-Kerdly-App-Version"], "5.12", path)
+            XCTAssertEqual(request.headers["X-Kerdly-App-Build"], "131", path)
         }
         XCTAssertEqual(h.onQueue { $0.configCache?.appVersion }, "5.12", "the cache remembers the version it is for")
     }
@@ -149,7 +149,7 @@ final class ConfigTests: XCTestCase {
         updated.configure()
         let refetch = try XCTUnwrap(updated.transport.requests(path: "/v1/sdk/config").first,
                                     "a fresh copy fetched for 5.12 is fetched again for 5.13")
-        XCTAssertEqual(refetch.headers["X-Afr-App-Version"], "5.13")
+        XCTAssertEqual(refetch.headers["X-Kerdly-App-Version"], "5.13")
         XCTAssertEqual(refetch.headers["If-None-Match"], Harness.configEtag)
         XCTAssertFalse(updated.onQueue { $0.launchConfigResolved }, "the collectors wait for 5.13's config")
         updated.transport.completeNext(.response(status: 304, headers: [:], body: Data()), path: "/v1/sdk/config")

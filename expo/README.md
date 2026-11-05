@@ -35,7 +35,7 @@ Add the config plugin to `app.json` / `app.config.ts`, then run `npx expo prebui
 
 | Option | Platform | Writes |
 |---|---|---|
-| `metaAppId` | Android | `<meta-data android:name="com.kerdly.sdk.META_APP_ID" android:value="@string/afr_meta_app_id">` plus that string resource. A string resource because a numeric literal in `android:value` is compiled as a number, not a string. Removed again when the option is dropped. |
+| `metaAppId` | Android | `<meta-data android:name="com.kerdly.sdk.META_APP_ID" android:value="@string/kerdly_meta_app_id">` plus that string resource. A string resource because a numeric literal in `android:value` is compiled as a number, not a string. Removed again when the option is dropped. |
 | `userTrackingPermission` | iOS | `NSUserTrackingUsageDescription`, the App Tracking Transparency prompt text. Needed for `requestTrackingAuthorization()`. |
 | `skanEndpoint` | iOS | `NSAdvertisingAttributionReportEndpoint`, the https origin that receives copies of SKAdNetwork postbacks. |
 
@@ -85,7 +85,7 @@ No function throws and no promise rejects. Invalid input is dropped with a devel
 | `Kerdly.trackSubscribe({ productId?, value?, currency?, transactionId?, properties? })` | Standard event `subscribe`. |
 | `Kerdly.trackPurchase({ productId?, value?, currency?, quantity?, transactionId?, properties? })` | Standard event `purchase`, a one-time purchase. |
 | `Kerdly.setConsent({ analytics?, ads? })` | An omitted flag keeps its value. `analytics: false` keeps only the SDK's own events; `ads: false` stops IDFA / GAID reads. |
-| `await Kerdly.handleUrl(url)` | Records `$deeplink` and returns `{ url, cpp, ppid, afrC, afrV, campaignIds }` (each `null` when absent), or `null`. |
+| `await Kerdly.handleUrl(url)` | Records `$deeplink` and returns `{ url, cpp, ppid, clickId, visitId, campaignIds }` (each `null` when absent), or `null`. |
 | `Kerdly.setAppAccountToken(token \| null)` | iOS: the StoreKit `appAccountToken` UUID. Android: the Play `obfuscatedAccountId` the purchases carry. |
 | `Kerdly.setPartnerIds({ meta_anon_id: '…' })` | Ids other SDKs own; merged, an empty value removes a key. |
 | `Kerdly.notifyPurchase(purchase?)` | `$purchase_link`, once per transaction / token. iOS shape `{ originalTransactionId, transactionId, productId, appAccountToken }`; Android shape `{ purchaseToken, orderId, products, purchaseTime, obfuscatedAccountId, obfuscatedProfileId }`. Each platform reads its own fields. On iOS, calling it with no purchase sweeps `Transaction.currentEntitlements`; Android needs `purchaseToken`. |

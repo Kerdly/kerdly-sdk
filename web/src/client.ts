@@ -9,9 +9,11 @@ import { newVisitorId, uuidv4 } from "./ids.js";
 import { DEFAULT_IPV6_ECHO_URL, publicIpv6 } from "./ipv6.js";
 import { IDENTIFY_PATH, TOUCH_PATH, endpointUrl, post } from "./transport.js";
 import type { Kerdly, KerdlyIdentify, KerdlyOptions, KerdlyTouch, KerdlyTouchCookies, KerdlyTouchKind, KerdlyVisitOptions } from "./types.js";
-import { VISIT_PARAM, decorateUrl, queryParam, withQueryParam } from "./url.js";
+import { decorateUrl, queryParam, visitParam, withoutVisitParam } from "./url.js";
 
-export const DEFAULT_VISITOR_COOKIE = "afr_vid";
+export const DEFAULT_VISITOR_COOKIE = "kerdly_vid";
+/** The default cookie as builds before 0.1.0 named it: adopted once, then cleared. */
+export const LEGACY_VISITOR_COOKIE = "afr_vid";
 export const DEFAULT_LINK_SELECTOR = "a[data-kerdly-link]";
 /** 400 days, the longest lifetime browsers keep a cookie for. */
 export const VISITOR_MAX_AGE_SECONDS = 400 * 24 * 60 * 60;
@@ -23,7 +25,9 @@ export const VISITOR_MAX_AGE_SECONDS = 400 * 24 * 60 * 60;
 const VISITS_GLOBAL = "__kerdlyVisits";
 
 /** The `localStorage` key of the last identify sent: `JSON.stringify([key, visitor_id, user_id])`. */
-export const IDENTIFY_STORAGE_KEY = "afr_uid";
+export const IDENTIFY_STORAGE_KEY = "kerdly_uid";
+/** The same record as builds before 0.1.0 stored it: read, then removed. */
+export const LEGACY_IDENTIFY_STORAGE_KEY = "afr_uid";
 /** The same record on `window`, the dedupe of a page whose `localStorage` cannot be read or written. */
 const IDENTIFY_GLOBAL = "__kerdlyUid";
 export const MAX_USER_ID_LENGTH = 128;
@@ -49,7 +53,8 @@ export function createKerdly(options: KerdlyOptions): Kerdly {
   const opts: Partial<KerdlyOptions> = options || {};
   const key = String(opts.key || "").trim();
   const endpoint = String(opts.endpoint || "").trim() || DEFAULT_ENDPOINT;
-  const cookieName = String(opts.visitorCookie || "").trim() || DEFAULT_VISITOR_COOKIE;
+  const customCookie = String(opts.visitorCookie || "").trim();
+  const cookieName = customCookie || DEFAULT_VISITOR_COOKIE;
   const browser = typeof window !== "undefined" && typeof document !== "undefined";
   // A secret key in a page is a leak: refuse to send it rather than let it work.
   const sendable = Boolean(key && endpoint) && !/^sk_/.test(key);
@@ -72,6 +77,11 @@ export function createKerdly(options: KerdlyOptions): Kerdly {
     if (visitor || !browser) return visitor;
     try {
       visitor = readCookie(document.cookie, cookieName) || "";
+      if (!visitor && !customCookie) {
+        // A visitor first seen by a build before 0.1.0 keeps its id under the new name.
+        visitor = readCookie(document.cookie, LEGACY_VISITOR_COOKIE) || "";
+        if (visitor && setCookie(cookieName, visitor, VISITOR_MAX_AGE_SECONDS)) setCookie(LEGACY_VISITOR_COOKIE, "", 0);
+      }
       if (!visitor) {
         visitor = newVisitorId();
         // When the cookie cannot be stored the id still holds for this page.
@@ -120,7 +130,7 @@ export function createKerdly(options: KerdlyOptions): Kerdly {
         url: location.href,
         referrer: document.referrer || null,
         title: document.title || null,
-        chain_from: queryParam(location.search, VISIT_PARAM),
+        chain_from: visitParam(location.search),
         link,
         cookies: adCookies(now),
         ...(ipv6 ? { ipv6 } : {}),
@@ -182,6 +192,7 @@ export function createKerdly(options: KerdlyOptions): Kerdly {
       let stored: string | null = null;
       try {
         stored = localStorage.getItem(IDENTIFY_STORAGE_KEY);
+        if (stored === null) stored = localStorage.getItem(LEGACY_IDENTIFY_STORAGE_KEY);
       } catch {
         // Blocked storage (a sandboxed frame, disabled site data): dedupe within this page only.
       }
@@ -192,6 +203,7 @@ export function createKerdly(options: KerdlyOptions): Kerdly {
       holder[IDENTIFY_GLOBAL] = record;
       try {
         localStorage.setItem(IDENTIFY_STORAGE_KEY, record);
+        localStorage.removeItem(LEGACY_IDENTIFY_STORAGE_KEY);
       } catch {
         // The next page load sends the pair again.
       }
@@ -245,8 +257,8 @@ export function createKerdly(options: KerdlyOptions): Kerdly {
           const anchor = node && typeof (node as Element).closest === "function" ? (node as Element).closest(links) : null;
           const href = anchor ? (anchor as HTMLAnchorElement).href : null;
           if (typeof href !== "string" || !/^https?:/i.test(href)) return;
-          // The link as authored: an href decorated by an earlier click is reported without afr_v.
-          const decorated = click(withQueryParam(href, VISIT_PARAM, null));
+          // The link as authored: an href decorated by an earlier click is reported without kerdly_v.
+          const decorated = click(withoutVisitParam(href));
           if (decorated !== href) (anchor as HTMLAnchorElement).href = decorated;
         } catch {
           // Never block a navigation.

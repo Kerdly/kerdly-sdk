@@ -117,7 +117,7 @@ struct DdlConfig: Equatable, Sendable {
     }
 }
 
-/// The cached config document (`Application Support/afr/config.json`).
+/// The cached config document (`Application Support/kerdly/config.json`).
 struct ConfigCache: Codable, Equatable, Sendable {
     var etag: String?
     /// ms since the epoch.

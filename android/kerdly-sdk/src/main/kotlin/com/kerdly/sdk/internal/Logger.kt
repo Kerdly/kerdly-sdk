@@ -4,10 +4,10 @@ import com.kerdly.sdk.KerdlyLogLevel
 import com.kerdly.sdk.BuildConfig
 
 internal object SdkInfo {
-    const val NAME = "afr-android"
+    const val NAME = "kerdly-android"
     val VERSION: String = BuildConfig.KERDLY_VERSION
 
-    /** `X-Afr-Sdk`: `afr-android/0.1.0`, plus ` expo/0.1.0` under a wrapper. */
+    /** `X-Kerdly-Sdk`: `kerdly-android/0.1.0`, plus ` expo/0.1.0` under a wrapper. */
     fun header(wrapper: String?): String = if (wrapper == null) "$NAME/$VERSION" else "$NAME/$VERSION $wrapper"
 }
 

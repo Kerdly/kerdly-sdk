@@ -159,6 +159,25 @@ final class InstallStateTests: XCTestCase {
         XCTAssertEqual(h.queuedEvents.first?.userId, "user-1")
     }
 
+    func testAnInstallIdKeptUnderTheKeysOfBuildsBefore010IsKept() {
+        let defaults = FakeDefaults([KerdlyCore.legacyDefaultsInstallIdKey: x])
+        defaults.set(true, forKey: KerdlyCore.legacyDefaultsKeychainFailedKey)
+        let h = Harness(keychain: FakeKeychain(nil), defaults: defaults)
+        h.configure()
+        XCTAssertEqual(h.core.installIdBox.get(), x)
+        XCTAssertEqual(defaults.string(forKey: KerdlyCore.defaultsInstallIdKey), x)
+        XCTAssertNil(defaults.string(forKey: KerdlyCore.legacyDefaultsInstallIdKey))
+        XCTAssertFalse(defaults.bool(forKey: KerdlyCore.legacyDefaultsKeychainFailedKey))
+    }
+
+    func testTheCurrentDefaultsKeyWinsOverALegacyOne() {
+        let defaults = FakeDefaults([KerdlyCore.defaultsInstallIdKey: x, KerdlyCore.legacyDefaultsInstallIdKey: y])
+        let h = Harness(keychain: FakeKeychain(x), defaults: defaults)
+        h.configure()
+        XCTAssertEqual(h.core.installIdBox.get(), x)
+        XCTAssertNil(defaults.string(forKey: KerdlyCore.legacyDefaultsInstallIdKey))
+    }
+
     func testLockedKeychainWaitsForProtectedData() {
         let keychain = FakeKeychain(x)
         keychain.forcedRead = .locked

@@ -21,7 +21,7 @@ import com.kerdly.sdk.internal.android.ExecutorScheduler
 import com.kerdly.sdk.internal.android.HttpUrlTransport
 import com.kerdly.sdk.internal.android.LifecycleTracker
 import com.kerdly.sdk.internal.android.MainThreadDispatcher
-import java.io.File
+import com.kerdly.sdk.internal.sdkDirectory
 
 /** The Kerdly SDK (protocol v1). Call [configure] once, in `Application.onCreate`.
  *
@@ -85,9 +85,9 @@ object Kerdly {
 
         val now = System.currentTimeMillis()
         val (store, identity) = withDiskAccess {
-            // All SDK state lives in noBackupFilesDir/afr/: Auto Backup never copies it. Only the
+            // All SDK state lives in noBackupFilesDir/kerdly/: Auto Backup never copies it. Only the
             // id is read here; a new one is written by the launch task.
-            val s = FileStore(File(appContext.noBackupFilesDir, "afr"))
+            val s = FileStore(sdkDirectory(appContext.noBackupFilesDir))
             s to InstallId.load(s)
         }
 

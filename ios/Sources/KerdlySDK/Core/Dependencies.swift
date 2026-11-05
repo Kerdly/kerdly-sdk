@@ -3,7 +3,7 @@ import Foundation
 // The seams between the SDK's logic and the system. Each protocol is small; the system
 // implementations live in Platform/, the tests' fakes in Tests/KerdlySDKTests/Support/.
 
-/// The Keychain copy of the install id (service `com.afr.sdk`, account `install_id`).
+/// The Keychain copy of the install id (service `com.kerdly.sdk`, account `install_id`).
 protocol KeychainStoring: Sendable {
     func readInstallId() -> KeychainRead
     func writeInstallId(_ id: String) -> Bool
@@ -17,7 +17,7 @@ protocol DefaultsStoring: Sendable {
     func set(_ value: Bool, forKey key: String)
 }
 
-/// The SDK's own files (`Application Support/afr/`). Writes are atomic.
+/// The SDK's own files (`Application Support/kerdly/`). Writes are atomic.
 protocol FileStoring: Sendable {
     func read(_ name: String) -> Data?
     @discardableResult func write(_ data: Data, to name: String) -> Bool

@@ -1,5 +1,5 @@
 {
-  "sdk": {"name": "afr-ios", "version": "0.1.0"},
+  "sdk": {"name": "kerdly-ios", "version": "0.1.0"},
   "app": {"bundle": "com.acme.other", "version": "5.12", "build": "131", "environment": "production"},
   "install_id": "8c1f5d0e-2f3a-4c55-9d7e-1b2c3d4e5f60",
   "sent_at": 1760400125000,
@@ -17,7 +17,7 @@
      "user_id": "m5KwQ2xYz", "props": {"url": "acmeapp://open?cpp=web-meta&ppid=ce3a1b2c-0000-4000-8000-000000000001",
                                        "source": "initial", "cpp": "web-meta",
                                        "ppid": "ce3a1b2c-0000-4000-8000-000000000001",
-                                       "afr_c": null, "afr_v": null, "campaign_ids": null}},
+                                       "kerdly_c": null, "kerdly_v": null, "campaign_ids": null}},
     {"id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c06", "name": "$purchase_link", "ts": 1760400120000, "seq": 10,
      "user_id": "m5KwQ2xYz", "props": {"store": "app_store", "original_transaction_id": "2000001012345678",
                                        "transaction_id": "2000001012345678", "product_id": "car_weekly_pro",

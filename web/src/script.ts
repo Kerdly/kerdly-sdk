@@ -47,11 +47,11 @@ export function optionsFromScript(script: HTMLScriptElement | null): KerdlyOptio
 }
 
 /**
- * The snippet's own tag: `document.currentScript` while it runs, else the first `kerdly.js` (or legacy
- * `afr.js`) script that carries a key (a loader that executes it some other way).
+ * The snippet's own tag: `document.currentScript` while it runs, else the first `kerdly.js` script
+ * that carries a key (a loader that executes it some other way).
  */
 export function findSnippetScript(): HTMLScriptElement | null {
   const current = document.currentScript;
   if (current && current.tagName === "SCRIPT") return current as HTMLScriptElement;
-  return document.querySelector<HTMLScriptElement>('script[data-key][src*="kerdly"], script[data-key][src*="afr"]');
+  return document.querySelector<HTMLScriptElement>('script[data-key][src*="kerdly"]');
 }

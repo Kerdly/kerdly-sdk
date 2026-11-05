@@ -31,8 +31,8 @@ class CoreTest {
         assertEquals("POST", request.method)
         assertEquals("https://sdk.example.com/v1/sdk/batch", request.url)
         assertEquals("Bearer pk_test_123", request.headers["Authorization"])
-        assertEquals("com.acme.other", request.headers["X-Afr-Bundle"])
-        assertEquals("afr-android/${SdkInfo.VERSION}", request.headers["X-Afr-Sdk"])
+        assertEquals("com.acme.other", request.headers["X-Kerdly-Bundle"])
+        assertEquals("kerdly-android/${SdkInfo.VERSION}", request.headers["X-Kerdly-Sdk"])
         assertEquals("application/json", request.headers["Content-Type"])
 
         val first = h.transport.batches().first()
@@ -161,7 +161,7 @@ class CoreTest {
         h.cfg = CoreConfig("pk_test_123", "https://sdk.example.com", "development", true, null, "expo/0.1.0")
         h.launch()
         h.runDue()
-        assertEquals("afr-android/${SdkInfo.VERSION} expo/0.1.0", h.transport.requests.first().headers["X-Afr-Sdk"])
+        assertEquals("kerdly-android/${SdkInfo.VERSION} expo/0.1.0", h.transport.requests.first().headers["X-Kerdly-Sdk"])
         val batch = h.transport.batches().first()
         assertEquals("expo/0.1.0", batch.getJSONObject("sdk").getString("wrapper"))
         assertEquals("development", batch.getJSONObject("app").getString("environment"))
@@ -611,7 +611,7 @@ class CoreTest {
         val props = dropped.getJSONObject("props")
         assertEquals("web-meta", props.getString("cpp"))
         assertEquals("initial", props.getString("source"))
-        assertTrue(props.isNull("afr_c"))
+        assertTrue(props.isNull("kerdly_c"))
         assertTrue(h.queued().none { it.getString("name") == "\$deeplink" })
         assertTrue(h.store.files[StoreFiles.PENDING_LINKS]!!.contains(dropped.getString("id")))
 
@@ -964,10 +964,10 @@ class CoreTest {
         h.launch()
         h.runDue()
         val first = h.transport.configRequests().single()
-        assertEquals("5.12", first.headers["X-Afr-App-Version"])
-        assertEquals("1310", first.headers["X-Afr-App-Build"])
+        assertEquals("5.12", first.headers["X-Kerdly-App-Version"])
+        assertEquals("1310", first.headers["X-Kerdly-App-Build"])
         val batches = h.transport.requests.filter { it.url.endsWith("/v1/sdk/batch") }
-        assertTrue(batches.isNotEmpty() && batches.all { it.headers["X-Afr-App-Version"] == "5.12" })
+        assertTrue(batches.isNotEmpty() && batches.all { it.headers["X-Kerdly-App-Version"] == "5.12" })
         assertEquals("the cache remembers the version it is for", "5.12", ConfigCache.parse(h.store.files[StoreFiles.CONFIG]).appVersion)
 
         h.platform.app = AppInfo("com.acme.other", "5.13", "1400")
@@ -977,7 +977,7 @@ class CoreTest {
         h.runDue()
         assertEquals("a fresh copy fetched for 5.12 is fetched again for 5.13", 2, h.transport.configRequests().size)
         val refetch = h.transport.configRequests()[1]
-        assertEquals("5.13", refetch.headers["X-Afr-App-Version"])
+        assertEquals("5.13", refetch.headers["X-Kerdly-App-Version"])
         assertEquals(FakeTransport.CONFIG_ETAG, refetch.headers["If-None-Match"])
         assertEquals("a 304 for 5.13 makes the copy 5.13's", "5.13", ConfigCache.parse(h.store.files[StoreFiles.CONFIG]).appVersion)
 

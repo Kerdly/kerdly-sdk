@@ -118,14 +118,14 @@ describe("kerdly.js snippet", () => {
     // The endpoint defaults to where the script came from.
     expect(page.beacon).toHaveBeenCalledOnce();
     expect(page.beacon.mock.calls[0]?.[0]).toBe("https://go.acme-app.com/v1/web/touch");
-    const vid = cookieOf(page, "afr_vid") ?? "";
+    const vid = cookieOf(page, "kerdly_vid") ?? "";
     expect(vid).toMatch(/^[0-9abcdefghjkmnpqrstvwxyz]{22}$/);
     expect(kerdly?.visitorId()).toBe(vid);
     expect(kerdly?.eventId("StartTrial")).toBe(`${vid}:StartTrial`);
     expect(cookieOf(page, "_fbc")).toMatch(/^fb\.1\.\d{13}\.IwAR0abc$/);
 
     const anchor = click(page, "a[data-kerdly-link]");
-    expect(anchor.href).toBe(`https://go.acme-app.com/k3f9q2x?afr_v=${vid}`);
+    expect(anchor.href).toBe(`https://go.acme-app.com/k3f9q2x?kerdly_v=${vid}`);
 
     const [visit, linkClick] = await page.touches();
     expect(visit).toMatchObject({
@@ -154,12 +154,12 @@ describe("kerdly.js snippet", () => {
     const identify = JSON.parse(await (page.beacon.mock.calls[1]?.[1] as Blob).text());
     expect(identify).toEqual({
       key: "wk_live_example",
-      visitor_id: cookieOf(page, "afr_vid"),
+      visitor_id: cookieOf(page, "kerdly_vid"),
       user_id: "Xq9vK2mT4bR7nP1sL8wZ3cY6hJ5d",
     });
-    expect(JSON.parse(page.window.localStorage.getItem("afr_uid") ?? "null")).toEqual([
+    expect(JSON.parse(page.window.localStorage.getItem("kerdly_uid") ?? "null")).toEqual([
       "wk_live_example",
-      cookieOf(page, "afr_vid"),
+      cookieOf(page, "kerdly_vid"),
       "Xq9vK2mT4bR7nP1sL8wZ3cY6hJ5d",
     ]);
   });
@@ -173,8 +173,8 @@ describe("kerdly.js snippet", () => {
     );
     expect(page.beacon.mock.calls[0]?.[0]).toBe("https://collector.example.com/api/v1/web/touch");
     expect(page.window.kerdly?.visitorId()).toBe(GUEST_ID);
-    expect(cookieOf(page, "afr_vid")).toBeUndefined();
-    expect(click(page, "a.cta").href).toBe(`https://go.acme-app.com/k3f9q2x?afr_v=${GUEST_ID}`);
+    expect(cookieOf(page, "kerdly_vid")).toBeUndefined();
+    expect(click(page, "a.cta").href).toBe(`https://go.acme-app.com/k3f9q2x?kerdly_v=${GUEST_ID}`);
     expect(click(page, "a[data-kerdly-link]").href).toBe("https://go.acme-app.com/other");
     expect((await page.touches()).map((t) => [t.kind, t.visitor_id])).toEqual([
       ["visit", GUEST_ID],
@@ -216,7 +216,7 @@ describe("kerdly.js snippet", () => {
       ["visit", undefined],
       ["click", IP6],
     ]);
-    expect(page.window.sessionStorage.getItem("afr_ip6")).toBe(IP6);
+    expect(page.window.sessionStorage.getItem("kerdly_ip6")).toBe(IP6);
 
     const off = vi.fn<Fetch>();
     await open(`<script src="${SNIPPET_URL}" data-key="wk_live_example" data-ipv6-echo-url="" async></script>`, "", [], off);

@@ -98,8 +98,8 @@ final class BatchFixtureTests: XCTestCase {
         XCTAssertEqual(request.method, "POST")
         XCTAssertEqual(request.url.absoluteString, "https://sdk.example.com/api/v1/sdk/batch")
         XCTAssertEqual(request.headers["Authorization"], "Bearer pk_test_123")
-        XCTAssertEqual(request.headers["X-Afr-Bundle"], "com.acme.other")
-        XCTAssertEqual(request.headers["X-Afr-Sdk"], "afr-ios/0.1.0 expo/0.1.0")
+        XCTAssertEqual(request.headers["X-Kerdly-Bundle"], "com.acme.other")
+        XCTAssertEqual(request.headers["X-Kerdly-Sdk"], "kerdly-ios/0.1.0 expo/0.1.0")
         XCTAssertEqual(request.headers["Content-Type"], "application/json")
     }
 

@@ -1,6 +1,6 @@
 {
   "sdk": {
-    "name": "afr-android",
+    "name": "kerdly-android",
     "version": "0.1.0"
   },
   "app": {
@@ -89,7 +89,7 @@
         "kind": "install_referrer",
         "status": "ok",
         "response_code": null,
-        "referrer": "afr_c=k3f9q2xab7mn&utm_source=meta&utm_medium=web2app&utm_campaign=failed3&afr_l=lnk_01&w2a_id=abcd1234efgh5678&lp=failing-exam&cpp=web-meta",
+        "referrer": "kerdly_c=k3f9q2xab7mn&utm_source=meta&utm_medium=web2app&utm_campaign=failed3&kerdly_l=lnk_01&w2a_id=abcd1234efgh5678&lp=failing-exam&cpp=web-meta",
         "click_ts": 1760399890,
         "install_begin_ts": 1760399930,
         "click_server_ts": 1760399891,

@@ -213,8 +213,8 @@ internal object ReservedProps {
             .put("source", source)
             .putNullable("cpp", link.cpp)
             .putNullable("ppid", link.ppid)
-            .putNullable("afr_c", link.afrC)
-            .putNullable("afr_v", link.afrV)
+            .putNullable(DeepLinks.CLICK_ID, link.clickId)
+            .putNullable(DeepLinks.VISIT_ID, link.visitId)
             .putNullable("campaign_ids", link.campaignIds)
 
     fun identify(userId: String?, previousUserId: String?): JSONObject =
@@ -295,8 +295,8 @@ internal object Signals {
             .put("click_ts", JSONObject.NULL)
             .putNullable("cpp", parsed?.cpp)
             .putNullable("ppid", parsed?.ppid)
-            .putNullable("afr_c", parsed?.afrC)
-            .putNullable("afr_v", parsed?.afrV)
+            .putNullable(DeepLinks.CLICK_ID, parsed?.clickId)
+            .putNullable(DeepLinks.VISIT_ID, parsed?.visitId)
             .putNullable("campaign_ids", parsed?.campaignIds)
             .putNullable("http_status", answer.httpStatus)
             .putNullable("detail", answer.detail?.take(300))

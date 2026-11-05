@@ -7,13 +7,15 @@ struct ParsedDeepLink: Equatable, Sendable {
     let url: String
     let cpp: String?
     let ppid: String?
-    let afrC: String?
-    let afrV: String?
+    /// A Kerdly link's click id (`kerdly_c`).
+    let clickId: String?
+    /// The web visit the link continues (`kerdly_v`).
+    let visitId: String?
     let campaignIds: String?
 
     /// Carries an attribution tag, so it is kept pending until a batch containing it is accepted.
     var isAttributionBearing: Bool {
-        cpp != nil || ppid != nil || afrC != nil || afrV != nil
+        cpp != nil || ppid != nil || clickId != nil || visitId != nil
     }
 
     var props: [String: JSONValue] {
@@ -21,8 +23,8 @@ struct ParsedDeepLink: Equatable, Sendable {
             "url": .string(url),
             "cpp": .string(cpp),
             "ppid": .string(ppid),
-            "afr_c": .string(afrC),
-            "afr_v": .string(afrV),
+            "kerdly_c": .string(clickId),
+            "kerdly_v": .string(visitId),
             "campaign_ids": .string(campaignIds),
         ]
     }
@@ -48,8 +50,9 @@ enum DeepLinkParser {
             url: String(url.absoluteString.prefix(maxUrlLength)),
             cpp: value("cpp"),
             ppid: value("ppid"),
-            afrC: value("afr_c"),
-            afrV: value("afr_v"),
+            // Links made before 0.1.0 spell these `afr_c` and `afr_v`.
+            clickId: value("kerdly_c") ?? value("afr_c"),
+            visitId: value("kerdly_v") ?? value("afr_v"),
             campaignIds: value("campaign_ids")
         )
     }

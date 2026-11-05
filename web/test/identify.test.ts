@@ -45,7 +45,7 @@ beforeEach(() => {
 
 describe("identify", () => {
   it("builds the fixture's request: key, visitor id and user id, to /v1/web/identify", async () => {
-    document.cookie = `afr_vid=${FIXTURE.visitor_id}; Path=/`;
+    document.cookie = `kerdly_vid=${FIXTURE.visitor_id}; Path=/`;
     const beacon = stubBeacon();
     expect(quiet({ key: FIXTURE.key }).identify(FIXTURE.user_id)).toBe(true);
     expect(beacon).toHaveBeenCalledOnce();
@@ -104,7 +104,7 @@ describe("identify", () => {
     vi.stubGlobal("fetch", undefined);
     const kerdly = quiet();
     expect(kerdly.identify(UID)).toBe(false);
-    expect(localStorage.getItem("afr_uid")).toBeNull();
+    expect(localStorage.getItem("kerdly_uid")).toBeNull();
     const beacon = stubBeacon();
     expect(kerdly.identify(UID)).toBe(true);
     expect(beacon).toHaveBeenCalledOnce();
@@ -121,14 +121,25 @@ describe("identify dedupe", () => {
     expect(beacon).toHaveBeenCalledOnce();
   });
 
-  it("keeps the last pair in localStorage as afr_uid, so later page loads do not resend it", () => {
+  it("keeps the last pair in localStorage as kerdly_uid, so later page loads do not resend it", () => {
     const beacon = stubBeacon();
     const kerdly = quiet();
     kerdly.identify(UID);
-    expect(JSON.parse(localStorage.getItem("afr_uid") ?? "null")).toEqual([KEY, kerdly.visitorId(), UID]);
+    expect(JSON.parse(localStorage.getItem("kerdly_uid") ?? "null")).toEqual([KEY, kerdly.visitorId(), UID]);
     nextPageLoad();
     expect(quiet().identify(UID)).toBe(false);
     expect(beacon).toHaveBeenCalledOnce();
+  });
+
+  it("reads the afr_uid record of builds before 0.1.0, and moves it to kerdly_uid on the next send", () => {
+    const beacon = stubBeacon();
+    const kerdly = quiet();
+    localStorage.setItem("afr_uid", JSON.stringify([KEY, kerdly.visitorId(), UID]));
+    expect(kerdly.identify(UID)).toBe(false);
+    expect(beacon).not.toHaveBeenCalled();
+    expect(kerdly.identify(OTHER_UID)).toBe(true);
+    expect(JSON.parse(localStorage.getItem("kerdly_uid") ?? "null")).toEqual([KEY, kerdly.visitorId(), OTHER_UID]);
+    expect(localStorage.getItem("afr_uid")).toBeNull();
   });
 
   it("sends a different user id, and the first one again after it (the last pair only)", async () => {
@@ -166,7 +177,7 @@ describe("identify no-ops", () => {
     expect(beacon).not.toHaveBeenCalled();
     expect(warn).toHaveBeenCalledTimes(invalid.length);
     expect(warn.mock.calls[0]?.[0]).toMatch(/^\[Kerdly\] identify: the user id must be/);
-    expect(localStorage.getItem("afr_uid")).toBeNull();
+    expect(localStorage.getItem("kerdly_uid")).toBeNull();
     expect(kerdly.identify("x".repeat(128))).toBe(true);
   });
 
@@ -182,7 +193,7 @@ describe("identify no-ops", () => {
     }
     expect(beacon).not.toHaveBeenCalled();
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(localStorage.getItem("afr_uid")).toBeNull();
+    expect(localStorage.getItem("kerdly_uid")).toBeNull();
     // The instance's own warning, once per instance.
     expect(warn.mock.calls.map(([message]) => String(message))).toEqual([
       "[Kerdly] a key is required; nothing is sent",
@@ -214,7 +225,7 @@ describe("identify without localStorage", () => {
     vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new DOMException("quota", "QuotaExceededError");
     });
-    expect(() => localStorage.getItem("afr_uid")).toThrow();
+    expect(() => localStorage.getItem("kerdly_uid")).toThrow();
     const beacon = stubBeacon();
     const kerdly = quiet();
     expect(kerdly.identify(UID)).toBe(true);
@@ -229,7 +240,7 @@ describe("identify without localStorage", () => {
     const beacon = stubBeacon();
     const kerdly = quiet();
     expect(kerdly.identify(UID)).toBe(true);
-    expect(localStorage.getItem("afr_uid")).toBeNull();
+    expect(localStorage.getItem("kerdly_uid")).toBeNull();
     expect(kerdly.identify(UID)).toBe(false);
     expect(beacon).toHaveBeenCalledOnce();
   });
@@ -239,7 +250,7 @@ describe("identify without localStorage", () => {
     const kerdly = quiet();
     kerdly.identify(UID);
     // Another tab of the same visitor signed in as OTHER_UID.
-    localStorage.setItem("afr_uid", JSON.stringify([KEY, kerdly.visitorId(), OTHER_UID]));
+    localStorage.setItem("kerdly_uid", JSON.stringify([KEY, kerdly.visitorId(), OTHER_UID]));
     expect(kerdly.identify(UID)).toBe(true);
     expect(beacon).toHaveBeenCalledTimes(2);
   });

@@ -19,7 +19,7 @@ internal interface Scheduler {
     fun schedule(delayMs: Long, task: () -> Unit): Cancellable
 }
 
-/** Small named files under `noBackupFilesDir/afr/`. */
+/** Small named files under `noBackupFilesDir/kerdly/`. */
 internal interface Store {
     /** The file's text, or null when the file does not exist. Throws when it exists but cannot be read. */
     @Throws(IOException::class)

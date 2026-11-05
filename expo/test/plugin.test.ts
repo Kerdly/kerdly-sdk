@@ -96,6 +96,16 @@ describe('config plugin', () => {
     expect(strings.resources.string).toEqual([]);
   });
 
+  it('replaces the afr_meta_app_id string that plugin builds before 0.1.0 wrote', async () => {
+    const config = appPlugin(baseConfig(), { metaAppId: '1234567890123456' });
+    const old = { resources: { string: [{ $: { name: 'afr_meta_app_id', translatable: 'false' }, _: '1234567890123456' }] } };
+    const strings = await runMod(config, 'android', 'strings', old);
+    expect(plugin.META_APP_ID_STRING).toBe('kerdly_meta_app_id');
+    expect(strings.resources.string).toEqual([
+      { $: { name: 'kerdly_meta_app_id', translatable: 'false' }, _: '1234567890123456' },
+    ]);
+  });
+
   it('accepts a numeric app id and rejects other types', () => {
     expect(plugin.normalizeProps({ metaAppId: 1234567890123456 }).metaAppId).toBe('1234567890123456');
     expect(() => plugin.normalizeProps({ userTrackingPermission: true })).toThrow(/must be a string/);

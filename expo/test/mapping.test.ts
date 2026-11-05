@@ -272,8 +272,8 @@ describe('async calls', () => {
       url,
       cpp: 'web-meta',
       ppid: null,
-      afrC: null,
-      afrV: null,
+      clickId: null,
+      visitId: null,
       campaignIds: null,
     });
     expect(native!.handleUrl).toHaveBeenCalledWith(url, null);

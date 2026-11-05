@@ -1,6 +1,6 @@
 {
   "sdk": {
-    "name": "afr-ios",
+    "name": "kerdly-ios",
     "version": "0.1.0",
     "wrapper": "expo/0.1.0"
   },

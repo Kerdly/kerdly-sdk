@@ -10,7 +10,7 @@ import kotlin.random.Random
 
 class BatchTest {
     private val envelopeInfo = BatchBody.Envelope(
-        sdkName = "afr-android",
+        sdkName = "kerdly-android",
         sdkVersion = "0.1.0",
         wrapper = null,
         bundle = "com.acme.other",
@@ -40,7 +40,7 @@ class BatchTest {
 
         val noContext = JSONObject(BatchBody.join(BatchBody.envelope(envelopeInfo, 1L, null), listOf(event(1))))
         assertFalse(noContext.has("context"))
-        val wrapped = JSONObject(BatchBody.envelope(BatchBody.Envelope("afr-android", "0.1.0", "expo/0.1.0", "b", null, null, "development", "i"), 1L, null))
+        val wrapped = JSONObject(BatchBody.envelope(BatchBody.Envelope("kerdly-android", "0.1.0", "expo/0.1.0", "b", null, null, "development", "i"), 1L, null))
         assertEquals("expo/0.1.0", wrapped.getJSONObject("sdk").getString("wrapper"))
         assertTrue(wrapped.getJSONObject("app").isNull("version"))
     }

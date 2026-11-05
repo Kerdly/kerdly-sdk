@@ -9,10 +9,13 @@ import java.io.ByteArrayOutputStream
 internal object DeepLinks {
     const val CPP = "cpp"
     const val PPID = "ppid"
-    const val AFR_C = "afr_c"
-    const val AFR_V = "afr_v"
+    const val CLICK_ID = "kerdly_c"
+    const val VISIT_ID = "kerdly_v"
+    /** The same two as links made before 0.1.0 spell them: read when the current name is absent. */
+    const val LEGACY_CLICK_ID = "afr_c"
+    const val LEGACY_VISIT_ID = "afr_v"
     const val CAMPAIGN_IDS = "campaign_ids"
-    private val PARAMS = setOf(CPP, PPID, AFR_C, AFR_V, CAMPAIGN_IDS)
+    private val PARAMS = setOf(CPP, PPID, CLICK_ID, VISIT_ID, LEGACY_CLICK_ID, LEGACY_VISIT_ID, CAMPAIGN_IDS)
 
     /** The collector's limit on `$deeplink.url`; longer URLs are cut (the params are parsed first). */
     const val MAX_URL_CHARS = 4096
@@ -26,15 +29,15 @@ internal object DeepLinks {
             url = trimmed,
             cpp = params[CPP],
             ppid = params[PPID],
-            afrC = params[AFR_C],
-            afrV = params[AFR_V],
+            clickId = params[CLICK_ID] ?: params[LEGACY_CLICK_ID],
+            visitId = params[VISIT_ID] ?: params[LEGACY_VISIT_ID],
             campaignIds = params[CAMPAIGN_IDS],
         )
     }
 
     /** A link carrying one of these is kept pending until the collector accepts it. */
     fun isAttributionBearing(link: KerdlyDeepLink): Boolean =
-        link.cpp != null || link.ppid != null || link.afrC != null || link.afrV != null
+        link.cpp != null || link.ppid != null || link.clickId != null || link.visitId != null
 
     /** The text between the first `?` and the fragment, or null when there is none. */
     fun query(url: String): String? {

@@ -4,8 +4,8 @@ import { recordCookieWrites, resetPage } from "./helpers.js";
 
 describe("readCookie", () => {
   it("reads one cookie out of a cookie string, as written", () => {
-    expect(readCookie("a=1; afr_vid=q3k9m2x7a8b4c5d6e7f8g9; b=2", "afr_vid")).toBe("q3k9m2x7a8b4c5d6e7f8g9");
-    expect(readCookie("x_afr_vid=1; afr_vid_x=2", "afr_vid")).toBeUndefined();
+    expect(readCookie("a=1; kerdly_vid=q3k9m2x7a8b4c5d6e7f8g9; b=2", "kerdly_vid")).toBe("q3k9m2x7a8b4c5d6e7f8g9");
+    expect(readCookie("x_kerdly_vid=1; kerdly_vid_x=2", "kerdly_vid")).toBeUndefined();
     expect(readCookie("v=a%3Db", "v")).toBe("a%3Db");
     expect(readCookie("", "v")).toBeUndefined();
     expect(readCookie(undefined, "v")).toBeUndefined();
@@ -57,10 +57,10 @@ describe("registrableDomain", () => {
 
 describe("cookieLine", () => {
   it("writes Max-Age, Path, Domain, SameSite and Secure", () => {
-    expect(cookieLine("afr_vid", "abc", 34560000, ".acme-app.com", true)).toBe(
-      "afr_vid=abc; Max-Age=34560000; Path=/; Domain=.acme-app.com; SameSite=Lax; Secure",
+    expect(cookieLine("kerdly_vid", "abc", 34560000, ".acme-app.com", true)).toBe(
+      "kerdly_vid=abc; Max-Age=34560000; Path=/; Domain=.acme-app.com; SameSite=Lax; Secure",
     );
-    expect(cookieLine("afr_vid", "abc", 10, undefined, false)).toBe("afr_vid=abc; Max-Age=10; Path=/; SameSite=Lax");
+    expect(cookieLine("kerdly_vid", "abc", 10, undefined, false)).toBe("kerdly_vid=abc; Max-Age=10; Path=/; SameSite=Lax");
   });
 });
 
