@@ -90,5 +90,9 @@
   },
   "bugs": {
     "url": "https://github.com/Kerdly/kerdly-sdk/issues"
+  },
+  "overrides": {
+    "glob": "^14.0.4",
+    "minimatch": "^11.0.5"
   }
 }
