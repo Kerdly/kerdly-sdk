@@ -85,7 +85,7 @@ server-rendered code; on the server `createKerdly` returns an instance that does
 | `visitorCookie` | `data-visitor-cookie` | `kerdly_vid` | Name an existing first-party id cookie to reuse it. It must be readable by JavaScript (not `HttpOnly`). |
 | `autoVisit` | | `true` | Record a visit when the SDK starts. |
 | `autoDecorate` | `data-auto-decorate` | `a[data-kerdly-link]` | Which links are app links: a CSS selector, or `false` to turn it off. |
-| `ipv6EchoUrl` | `data-ipv6-echo-url` | on | Improves matching on mobile networks. `null` (or an empty attribute) turns it off. |
+| `ipv6EchoUrl` | `data-ipv6-echo-url` | on | Looks up the visitor's public IPv6 address once per tab. `null` (or an empty attribute) turns it off. |
 
 ## API
 
