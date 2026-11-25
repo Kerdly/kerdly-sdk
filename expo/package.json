@@ -1,6 +1,6 @@
 {
   "name": "@kerdly/expo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Kerdly SDK for Expo and React Native: first-party install attribution, deep links, events and subscription purchases for iOS and Android, so you can see which ads pay back.",
   "license": "MIT",
   "author": "Kerdly",

@@ -206,7 +206,8 @@ What the SDK sends, for your Google Play data safety form:
 | The user id you set | when you call `setUserId` |
 | The Google advertising id and install referrer, sent to TikTok to ask which ad led to the install | only when you turn on deferred deep links in your Kerdly project, with `ads` consent |
 
-The SDK never collects names, email addresses, phone numbers, location or contacts.
+The SDK never collects names, email addresses, phone numbers or contacts, and never reads
+location services (GPS).
 
 ## Troubleshooting
 

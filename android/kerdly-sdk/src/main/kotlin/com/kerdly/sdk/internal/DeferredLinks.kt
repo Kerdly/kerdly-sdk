@@ -13,7 +13,7 @@ internal class DdlConfig(
     val maxAgeMs: Long,
     /** TikTok Events Manager's App ID; null = TikTok is not asked. */
     val tiktokAppId: String?,
-    /** What the Business SDK sends as `app.id`: the package. */
+    /** What TikTok expects as `app.id`: the package. */
     val storeAppId: String?,
 ) {
     companion object {
@@ -48,8 +48,7 @@ internal class DdlAnswer(
         get() = status == "error" && (httpStatus == null || httpStatus == 429 || httpStatus >= 500)
 }
 
-/** TikTok's deferred-deep-link request, field for field the Business SDK 1.7.0's
- * (`TTRequestBuilder.ddlJson`): unsigned JSON with the GAID and the raw Play referrer, which
+/** TikTok's deferred-deep-link request: unsigned JSON with the GAID and the raw Play referrer, which
  * TikTok decodes on its side. */
 internal object TikTokDdl {
     const val NETWORK = "tiktok"

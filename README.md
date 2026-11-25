@@ -36,7 +36,7 @@ See [pricing](https://kerdly.com/pricing) and [integrations](https://kerdly.com/
 
 | Platform | Package | Install | Guide |
 |---|---|---|---|
-| iOS | `KerdlySDK` | SwiftPM `https://github.com/Kerdly/kerdly-sdk` or `pod 'KerdlySDK'` | [ios/README](ios/README.md) |
+| iOS | `KerdlySDK` | Swift Package Manager: `https://github.com/Kerdly/kerdly-sdk` | [ios/README](ios/README.md) |
 | Android | `com.kerdly:kerdly-sdk` | `implementation("com.kerdly:kerdly-sdk:0.1.0")` | [android/README](android/README.md) |
 | Expo / React Native | `@kerdly/expo` | `npx expo install @kerdly/expo` | [kerdly.com/docs/sdks/expo](https://kerdly.com/docs/sdks/expo), [expo/README](expo/README.md) |
 | Web | `@kerdly/web`, `kerdly.js` | `npm install @kerdly/web` or the snippet | [kerdly.com/docs/sdks/web](https://kerdly.com/docs/sdks/web), [web/README](web/README.md) |
@@ -84,7 +84,7 @@ SDK collects on its own.
 ## Versions and releases
 
 Each SDK has its own version and is released only when it changes. Releases are tagged in this
-repository: iOS with the bare version (`0.1.0`, what Swift Package Manager and CocoaPods resolve),
+repository: iOS with the bare version (`0.1.0`, what Swift Package Manager resolves),
 the others as `android-v0.1.0`, `expo-v0.1.0` and `web-v0.1.0`. Each SDK's folder has its
 changelog. Until 1.0, a minor version may change the public API.
 

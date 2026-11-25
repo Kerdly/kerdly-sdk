@@ -4,6 +4,15 @@
 carries. Releases are tagged `expo-v<version>`. Until 1.0, a minor version may change the public
 API.
 
+## 0.1.1
+
+Contains iOS SDK 0.1.0 and Android SDK 0.1.0. No change in behaviour.
+
+- `KerdlyAttribution.method` no longer lists method names in its type; it stays a string, and
+  existing values keep working.
+- Clearer comments in the bundled iOS and Android sources and in the iOS privacy manifest.
+- Dev dependencies updated for security alerts (undici, glob, minimatch, uuid).
+
 ## 0.1.0
 
 First public release under the Kerdly name, on protocol v1, with iOS SDK 0.1.0 and Android SDK

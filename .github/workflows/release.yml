@@ -8,7 +8,7 @@ name: Release
 #
 # then merge to main. CI refuses a new version that changes nothing its SDK ships.
 #
-# Each release job tags the commit first (iOS `0.2.0`, which SwiftPM and CocoaPods resolve; the
+# Each release job tags the commit first (iOS `0.2.0`, which Swift Package Manager resolves; the
 # others `android-v0.2.0`, `expo-v0.2.0`, `web-v0.2.0`), then publishes, then creates the GitHub
 # release from the SDK's CHANGELOG section. If a job fails after tagging, use "Re-run failed jobs":
 # a later push to main does not retry it, because the tag exists.
@@ -249,11 +249,10 @@ jobs:
       RELEASE_TAG: ${{ needs.plan.outputs.ios_tag }}
     steps:
       - uses: actions/checkout@v7
-      - name: Tag (SwiftPM resolves it; CocoaPods needs it before the push)
+      # The tag is the release: Swift Package Manager installs straight from it. The SDK is not on
+      # CocoaPods, whose trunk stops taking new versions on 2026-12-02.
+      - name: Tag
         run: git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" > /dev/null || { git tag "$RELEASE_TAG" "$GITHUB_SHA" && git push origin "refs/tags/$RELEASE_TAG"; }
-      - run: pod trunk push KerdlySDK.podspec --allow-warnings
-        env:
-          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
       - name: GitHub release
         run: |
           awk -v v="$VERSION" '$0 ~ "^## " {p = ($2 == v)} p' ios/CHANGELOG.md | tail -n +2 > notes.md

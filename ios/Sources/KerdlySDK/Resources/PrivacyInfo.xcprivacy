@@ -2,7 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- The SDK itself does not track. The IDFA is read only after the user authorized ATT. -->
+	<!-- Tracking: the IDFA, read only after the user authorizes ATT, and the deferred-link request
+	     to Meta's tracking domain below, sent only in that case. -->
 	<key>NSPrivacyTracking</key>
 	<true/>
 	<key>NSPrivacyTrackingDomains</key>

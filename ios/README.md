@@ -33,11 +33,9 @@ In a `Package.swift`:
 .product(name: "KerdlySDK", package: "kerdly-sdk")
 ```
 
-### CocoaPods
-
-```ruby
-pod 'KerdlySDK', '~> 0.1.0'
-```
+The SDK is distributed through Swift Package Manager only. It is not on CocoaPods, which stops
+taking new versions in December 2026. React Native and Expo apps use
+[`@kerdly/expo`](../expo/README.md), which carries the same iOS code.
 
 ## Configure
 
@@ -219,7 +217,8 @@ What the SDK sends, for your App Store privacy answers:
 | The user id you set | when you call `setUserId` |
 | The IDFA (when allowed), sent to Meta and TikTok to ask which ad led to the install | only when you turn on deferred deep links in your Kerdly project, with `ads` consent |
 
-The SDK never collects names, email addresses, phone numbers, location or clipboard contents.
+The SDK never collects names, email addresses, phone numbers or clipboard contents, and never
+reads location services (GPS).
 It ships a privacy manifest (`PrivacyInfo.xcprivacy`) that Xcode includes in your app's privacy
 report.
 

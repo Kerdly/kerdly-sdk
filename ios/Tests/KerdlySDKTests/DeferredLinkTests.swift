@@ -49,8 +49,8 @@ final class DeferredLinkTests: XCTestCase {
         let body = form(request)
         XCTAssertNil(body["advertiser_id"], "the IDFA never goes without tracking authorized")
         XCTAssertEqual(body["advertiser_tracking_enabled"], "0")
-        XCTAssertEqual(body["application_tracking_enabled"], "1", "an app setting in FBSDKCoreKit, not ATT")
-        XCTAssertEqual(body["advertiser_id_collection_enabled"], "1", "an app setting in FBSDKCoreKit, not ATT")
+        XCTAssertEqual(body["application_tracking_enabled"], "1", "an app setting at Meta, not ATT")
+        XCTAssertEqual(body["advertiser_id_collection_enabled"], "1", "an app setting at Meta, not ATT")
         XCTAssertEqual(body["anon_id"], "XZABC")
         XCTAssertEqual(body["event"], "DEFERRED_APP_LINK")
     }
