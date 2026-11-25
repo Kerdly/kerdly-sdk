@@ -1,7 +1,7 @@
 // The four SDKs, each released on its own version. Shared by version.mjs and release-plan.mjs.
 //
-// A release is tagged in this repository: iOS with the bare version (`0.2.0`, what SwiftPM and
-// CocoaPods resolve), the others with their name (`web-v0.2.0`, `expo-v0.2.0`, `android-v0.2.0`).
+// A release is tagged in this repository: iOS with the bare version (`0.2.0`, what Swift Package
+// Manager resolves), the others with their name (`web-v0.2.0`, `expo-v0.2.0`, `android-v0.2.0`).
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -35,12 +35,10 @@ export const SDKS = {
     tag: (v) => v,
     versionOf: (tag) => (SEMVER.test(tag) ? tag : null),
     changelog: 'ios/CHANGELOG.md',
-    paths: ['ios/Sources/', 'Package.swift', 'KerdlySDK.podspec'],
+    paths: ['ios/Sources/', 'Package.swift'],
     files: [
-      regex('KerdlySDK.podspec', /(s\.version\s*=\s*')([^']+)(')/),
       regex('ios/Sources/KerdlySDK/Core/KerdlyCore.swift', /(static let sdkVersion = ")([^"]+)(")/),
       regex('ios/README.md', /(upToNextMinor\(from: ")([^"]+)(")/),
-      regex('ios/README.md', /(pod 'KerdlySDK', '~> )([^']+)(')/),
     ],
   },
   android: {

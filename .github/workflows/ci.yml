@@ -94,5 +94,3 @@ jobs:
         with:
           name: ios-xcodebuild-log
           path: xcodebuild.log
-      - name: Podspec
-        run: pod lib lint KerdlySDK.podspec --allow-warnings

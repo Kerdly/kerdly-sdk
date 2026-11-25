@@ -1,9 +1,7 @@
 import Foundation
 
-/// Deferred deep links: the networks' own requests, sent from the device, so a network can say
-/// which of its ads an install came from. Each request mirrors the network SDK's own, field for
-/// field: Meta from FBSDKCoreKit 18.1.1 (`FBSDKAppLinkUtility fetchDeferredAppLink`), TikTok from
-/// TikTokBusinessSDK 1.7.1 (`fetchDeferredDeeplinkWithConfig`).
+/// Deferred deep links: a request from the device to each ad network the app's Kerdly project
+/// names (Meta, TikTok), asking which of the network's ads, if any, led to this install.
 ///
 /// Pure: the core gathers the device facts and sends the request.
 
@@ -75,16 +73,15 @@ extension DdlAnswer {
 
 enum MetaDdl {
     static let network = "meta"
-    /// The hosts FBSDKCoreKit's default domain config routes `/activities` to: `ep1` with tracking
-    /// authorized, `ep2` without. Only `ep1` is a tracking domain in the privacy manifest (FBSDK
-    /// refuses `ep2` as one), so iOS lets the `ep2` request through for a user who denied tracking.
+    /// Meta's hosts for `/activities`: `ep1` when tracking is authorized (the request carries the
+    /// IDFA; declared as a tracking domain in the privacy manifest), `ep2` otherwise (no IDFA).
     static let trackingHost = "ep1.facebook.com"
     static let noTrackingHost = "ep2.facebook.com"
-    /// FBSDKCoreKit 18.1.1's `FBSDK_DEFAULT_GRAPH_API_VERSION`.
+    /// The Graph API version the request uses.
     static let defaultGraphVersion = "v26.0"
 
-    /// FBSDKAppEventsDeviceInfo's 16-slot `extinfo`, version `i2`. Carrier is empty since iOS 16;
-    /// slots 13–14 (disk) are -1, as the SDK sends them.
+    /// Meta's 16-slot `extinfo` device field, version `i2`. Carrier is empty (iOS 16 and later no
+    /// longer reports it); slots 13–14 (disk) are -1.
     static func extinfo(_ f: DdlDeviceFacts) -> String {
         let density = f.screenScale > 0 ? String(format: "%.02f", f.screenScale) : ""
         let slots: [Any] = [
@@ -96,9 +93,9 @@ enum MetaDdl {
 
     /// `POST https://<host>/<version>/<app id>/activities`, form-encoded, signed with the app's
     /// public client token. With tracking authorized: `ep1`, the IDFA and
-    /// `advertiser_tracking_enabled=1`. Without: `ep2`, no IDFA and `0`, as FBSDKCoreKit sends it.
+    /// `advertiser_tracking_enabled=1`. Without: `ep2`, no IDFA and `0`.
     /// `application_tracking_enabled` and `advertiser_id_collection_enabled` are app settings in
-    /// FBSDKCoreKit, not the ATT status, so both stay `1`.
+    /// Meta, not the ATT status, so both stay `1`.
     static func request(appId: String, clientToken: String, anonId: String, facts: DdlDeviceFacts,
                         trackingAuthorized: Bool, graphVersion: String = defaultGraphVersion) -> HTTPRequest? {
         let host = trackingAuthorized ? trackingHost : noTrackingHost
@@ -148,16 +145,16 @@ enum MetaDdl {
 
 enum TikTokDdl {
     static let network = "tiktok"
-    /// TikTokBusinessSDK's default `apiDomain`.
+    /// TikTok's default API host.
     static let defaultHost = "analytics.us.tiktok.com"
     static let path = "/api/v1/app_sdk/ddl"
 
-    /// The SDK's `fallbackUserAgent`: app/version, model, OS, resolution.
+    /// The user agent: app/version, model, OS, resolution.
     static func userAgent(_ f: DdlDeviceFacts) -> String {
         "\(f.appName)/\(f.appVersion) \(f.model) iOS/\(f.os) Resolution/\(f.screenWidth)*\(f.screenHeight)"
     }
 
-    /// TikTokBusinessSDK's `att_status` names.
+    /// TikTok's `att_status` names.
     static func attStatus(_ status: KerdlyAttStatus) -> String {
         switch status {
         case .authorized: return "AUTHORIZED"

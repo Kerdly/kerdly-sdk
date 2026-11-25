@@ -5,7 +5,6 @@ import { SDKS, compareVersions, enabledSdks, plan, ships, versionOnly } from './
 test('each SDK ships its sources but not its tests or docs', () => {
   assert.ok(ships('ios', 'ios/Sources/KerdlySDK/Core/KerdlyCore.swift'));
   assert.ok(ships('ios', 'Package.swift'));
-  assert.ok(ships('ios', 'KerdlySDK.podspec'));
   assert.ok(!ships('ios', 'ios/Tests/KerdlySDKTests/ConfigTests.swift'));
   assert.ok(!ships('ios', 'ios/README.md'));
   assert.ok(ships('android', 'android/kerdly-sdk/src/main/kotlin/com/kerdly/sdk/Kerdly.kt'));

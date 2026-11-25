@@ -157,7 +157,6 @@ export interface KerdlyAttribution {
     | 'meta_install_referrer'
     | 'cpp_deeplink'
     | 'visit_chain'
-    | 'ip_match'
     | 'none'
     | (string & {});
   campaignId: string | null;
