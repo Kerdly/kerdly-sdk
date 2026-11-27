@@ -84,8 +84,8 @@ describe("public IPv6 lookup", () => {
       ["visit", IP6],
     ]);
     expect(touches[0]).not.toHaveProperty("ipv6");
-    // Where puts it: after cookies, before ts.
-    expect(Object.keys(touches[2] ?? {}).slice(-3)).toEqual(["cookies", "ipv6", "ts"]);
+    // Where it goes: after cookies, before the user agent and ts.
+    expect(Object.keys(touches[2] ?? {}).slice(-4)).toEqual(["cookies", "ipv6", "ua", "ts"]);
   });
 
   it("sends it with the auto-decorate click", async () => {

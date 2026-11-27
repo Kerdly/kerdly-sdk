@@ -46,6 +46,9 @@ function linkSelector(option: string | boolean | undefined): string | null {
   return typeof option === "string" && option.trim() ? option.trim() : DEFAULT_LINK_SELECTOR;
 }
 
+/** The longest User-Agent a touch carries (the collector takes up to 512). */
+const MAX_UA_LENGTH = 512;
+
 /** The Kerdly collector, used when `endpoint` is not given. */
 export const DEFAULT_ENDPOINT = "https://app.kerdly.com/api";
 
@@ -118,10 +121,18 @@ export function createKerdly(options: KerdlyOptions): Kerdly {
     };
   }
 
+  /** The browser's own User-Agent, sent in the body because some hosting
+   * front ends replace the request header on its way to the collector. */
+  function userAgent(): string | null {
+    const ua = typeof navigator !== "undefined" ? String(navigator.userAgent || "").trim() : "";
+    return ua ? ua.slice(0, MAX_UA_LENGTH) : null;
+  }
+
   function touch(kind: KerdlyTouchKind, link: string | null): boolean {
     if (!browser || !sendable) return false;
     try {
       const now = Date.now();
+      const ua = userAgent();
       const payload: KerdlyTouch = {
         key,
         event_id: uuidv4(),
@@ -134,6 +145,7 @@ export function createKerdly(options: KerdlyOptions): Kerdly {
         link,
         cookies: adCookies(now),
         ...(ipv6 ? { ipv6 } : {}),
+        ...(ua ? { ua } : {}),
         ts: now,
       };
       return post(endpointUrl(endpoint, TOUCH_PATH), JSON.stringify(payload)) !== "none";

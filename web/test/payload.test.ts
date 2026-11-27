@@ -26,6 +26,7 @@ describe("touch payload", () => {
     document.cookie = `_fbp=${FIXTURE.cookies.fbp}; Path=/`;
     document.cookie = `kerdly_vid=${FIXTURE.visitor_id}; Path=/`;
     vi.spyOn(Date, "now").mockReturnValue(FIXTURE.ts);
+    vi.spyOn(navigator, "userAgent", "get").mockReturnValue(FIXTURE.ua ?? "");
     vi.spyOn(crypto, "randomUUID").mockReturnValue(FIXTURE.event_id as ReturnType<Crypto["randomUUID"]>);
     const beacon = stubBeacon();
 
@@ -92,6 +93,21 @@ describe("touch payload", () => {
     const [visit] = await beaconTouches(beacon);
     expect(visit?.chain_from).toBe("7h3k9q2x7a8b4c");
     expect(visit?.url).toBe("https://acme-app.com/lp/failing-exam?afr_v=7h3k9q2x7a8b4c&src=qr");
+  });
+
+  it("carries the browser's user agent, cut to 512 characters, and none when it has none", async () => {
+    const ua = vi.spyOn(navigator, "userAgent", "get").mockReturnValue("Mozilla/5.0 " + "x".repeat(600));
+    let beacon = stubBeacon();
+    createKerdly({ key: "wk_live_example", endpoint: "https://go.acme-app.com", autoDecorate: false });
+    const [long] = await beaconTouches(beacon);
+    expect(long?.ua).toHaveLength(512);
+    expect(long?.ua?.startsWith("Mozilla/5.0 ")).toBe(true);
+    ua.mockReturnValue("");
+    resetPage();
+    beacon = stubBeacon();
+    createKerdly({ key: "wk_live_example", endpoint: "https://go.acme-app.com", autoDecorate: false });
+    const [none] = await beaconTouches(beacon);
+    expect(none).not.toHaveProperty("ua");
   });
 
   it("puts the key in the body, never in a URL or header", async () => {

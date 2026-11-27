@@ -1,6 +1,6 @@
 {
   "name": "@kerdly/web",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Kerdly web SDK and kerdly.js snippet: first-party visitor ids, ad click and visit attribution, web-to-app links and identify, so you can see which ads pay back.",
   "license": "MIT",
   "author": "Kerdly",

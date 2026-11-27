@@ -40,7 +40,7 @@ To review each update yourself instead, pin a release. Its file never changes, a
 `integrity` attribute makes the browser refuse anything else:
 
 ```html
-<script src="https://cdn.kerdly.com/0.1.0/kerdly.js"
+<script src="https://cdn.kerdly.com/0.1.1/kerdly.js"
         integrity="sha384-…" crossorigin="anonymous"
         data-key="wk_live_…" async></script>
 ```
@@ -157,7 +157,8 @@ const kerdly = createKerdly({ key: "wk_live_…", autoVisit: false, autoDecorate
 ```
 
 What the SDK sends with each visit or click: the page URL and title, the referrer, the visitor id,
-the Meta and TikTok cookies above, and the visitor's public IPv6 address when available.
+the Meta and TikTok cookies above, the browser's user agent (some hosting front ends replace the
+request's own on its way to Kerdly), and the visitor's public IPv6 address when available.
 
 ## Troubleshooting
 
