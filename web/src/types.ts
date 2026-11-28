@@ -98,6 +98,9 @@ export interface KerdlyTouch {
   cookies: KerdlyTouchCookies;
   /** The browser's public IPv6 (global unicast); absent until the tab session's lookup has one. */
   ipv6?: string;
+  /** `navigator.userAgent`, at most 512 characters. The collector reads it only when the request's
+   * own `User-Agent` didn't reach it (a front end replaced it). */
+  ua?: string;
   /** Browser clock, ms since the epoch. */
   ts: number;
 }
